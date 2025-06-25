@@ -7,8 +7,13 @@ struct Main {
         let eduHelper = EduHelper()
         do {
             try await eduHelper.login(username: "", password: "")
+            debugPrint(try await eduHelper.checkLoginStatus())
+            let profile = try await eduHelper.getProfile()
+            debugPrint(profile)
+            try await eduHelper.logout()
+            debugPrint(try await eduHelper.checkLoginStatus())
         } catch {
-            print("Login failed with error: \(error)")
+            print("Error: \(error)")
         }
     }
 }
