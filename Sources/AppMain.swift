@@ -7,11 +7,14 @@ struct Main {
         let eduHelper = EduHelper()
         do {
             try await eduHelper.login(username: "", password: "")
-            debugPrint(try await eduHelper.checkLoginStatus())
-            let profile = try await eduHelper.getProfile()
-            debugPrint(profile)
+
+            let exams = try await eduHelper.getExamSchedule(
+                academicYearSemester: nil, semesterType: nil)
+            for exam in exams {
+                debugPrint(exam)
+            }
+
             try await eduHelper.logout()
-            debugPrint(try await eduHelper.checkLoginStatus())
         } catch {
             print("Error: \(error)")
         }
