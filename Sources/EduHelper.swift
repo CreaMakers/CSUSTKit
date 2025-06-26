@@ -112,6 +112,9 @@ class EduHelper {
         return response.contains("请输入账号")
     }
 
+    /**
+     * 检查当前登录状态
+     */
     func checkLoginStatus() async throws -> Bool {
         let response = try await session.request(
             "http://xk.csust.edu.cn/jsxsd/framework/xsMain.jsp"
@@ -120,6 +123,12 @@ class EduHelper {
         return !isLoginRequired(response: response)
     }
 
+    /**
+     * 登录
+     * - Parameters:
+     *   - username: 用户名
+     *   - password: 密码
+     */
     func login(username: String, password: String) async throws {
         let codeResponse = try await session.request(
             "http://xk.csust.edu.cn/Logon.do?method=logon&flag=sess", method: .post
@@ -170,6 +179,10 @@ class EduHelper {
         }
     }
 
+    /**
+     * 获取学生档案信息
+     * - Returns: 学生档案信息
+     */
     func getProfile() async throws -> Profile {
         let profileResponse = try await session.request("http://xk.csust.edu.cn/jsxsd/grxx/xsxx")
             .serializingString().value
@@ -234,6 +247,9 @@ class EduHelper {
         )
     }
 
+    /**
+     * 登出
+     */
     func logout() async throws {
         let timestamp = Int(Date().timeIntervalSince1970 * 1000)
         _ = try await session.request(
@@ -244,6 +260,13 @@ class EduHelper {
         session = Session()
     }
 
+    /**
+     * 获取考试安排
+     * - Parameters:
+     *   - academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则使用当前默认学期
+     *   - semesterType: 学期类型，如果为 `nil` 则查询所有类型的考试
+     * - Returns: 考试信息数组
+     */
     func getExamSchedule(academicYearSemester: String?, semesterType: SemesterType?) async throws
         -> [Exam]
     {
@@ -251,7 +274,7 @@ class EduHelper {
         if let academicYearSemester = academicYearSemester {
             queryAcademicYearSemester = academicYearSemester
         } else {
-            let semesters = try await getExamScheduleForAllSemesters()
+            let semesters = try await getAvailableSemestersForExamSchedule()
             queryAcademicYearSemester = semesters.1.name
         }
 
@@ -317,7 +340,11 @@ class EduHelper {
         return exams
     }
 
-    func getExamScheduleForAllSemesters() async throws -> ([Semester], Semester) {
+    /**
+     * 获取考试安排的所有可用学期以及默认学期
+     * - Returns: 包含所有可用学期的数组和默认学期
+     */
+    func getAvailableSemestersForExamSchedule() async throws -> ([Semester], Semester) {
         let response = try await session.request("http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
             .serializingString().value
         guard !isLoginRequired(response: response) else {
