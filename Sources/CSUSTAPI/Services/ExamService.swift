@@ -1,13 +1,7 @@
 import Alamofire
 import SwiftSoup
 
-protocol ExamServiceProtocol {
-    func getExamSchedule(academicYearSemester: String?, semesterType: SemesterType?) async throws
-        -> [Exam]
-    func getAvailableSemestersForExamSchedule() async throws -> ([String], String)
-}
-
-class ExamService: BaseService, ExamServiceProtocol {
+class ExamService: BaseService {
     /**
      * 获取考试安排
      * - Parameters:
@@ -91,8 +85,7 @@ class ExamService: BaseService, ExamServiceProtocol {
         var defaultSemester: String?
         for option in options {
             let name = try option.text().trim()
-            let isDefault = option.hasAttr("selected")
-            if isDefault {
+            if option.hasAttr("selected") {
                 defaultSemester = name
             }
             semesters.append(name)

@@ -1,13 +1,7 @@
 import Alamofire
 import Foundation
 
-protocol AuthServiceProtocol {
-    func checkLoginStatus() async throws -> Bool
-    func login(username: String, password: String) async throws
-    func logout() async throws
-}
-
-class AuthService: BaseService, AuthServiceProtocol {
+class AuthService: BaseService {
     /**
      * 检查当前登录状态
      */

@@ -1,17 +1,9 @@
 import Alamofire
+import Foundation
 import SwiftSoup
 
-protocol CourseServiceProtocol {
-    func getCourseGrades(
-        academicYearSemester: String, courseNature: CourseNature?,
-        courseName: String,
-        displayMode: DisplayMode, studyMode: StudyMode
-    ) async throws -> [CourseGrade]
-    func getAvailableSemestersForCourseGrades() async throws -> [String]
-    func getGradeDetail(url: String) async throws -> GradeDetail
-}
-
-class CourseService: BaseService, CourseServiceProtocol {
+@available(macOS 13.0, *)
+class CourseService: BaseService {
     /**
      * 获取课程成绩
      * - Parameters:
@@ -200,5 +192,211 @@ class CourseService: BaseService, CourseServiceProtocol {
                 "Invalid total grade format: \(String(describing: totalGrade))")
         }
         return GradeDetail(components: components, totalGrade: totalGradeValue)
+    }
+
+    private func parseDate(date: String) throws -> ([Int], [Int]) {
+        // 周 单周 双周
+        enum WeekType: String, CaseIterable {
+            case single = "(单周)"
+            case double = "(双周)"
+            case all = "(周)"
+        }
+
+        var weekType: WeekType? = nil
+        for type in WeekType.allCases {
+            if date.contains(type.rawValue) {
+                weekType = type
+                break
+            }
+        }
+        guard let weekType = weekType else {
+            throw EduHelperError.courseScheduleRetrievalFailed(
+                "Invalid week type in date: \(date).")
+        }
+
+        let parts = date.components(separatedBy: weekType.rawValue)
+        guard parts.count == 2 else {
+            throw EduHelperError.courseScheduleRetrievalFailed("Invalid date format: \(date).")
+        }
+        let weekPart = parts[0]
+        let sectionPart = parts[1].trimmingCharacters(in: CharacterSet(charactersIn: "[]节"))
+
+        var weeks: [Int] = []
+        var sections: [Int] = []
+
+        for weekSection in weekPart.components(separatedBy: ",") {
+            if weekSection.contains("-") {
+                let rangeParts = weekSection.components(separatedBy: "-")
+                guard rangeParts.count == 2, let startWeek = Int(rangeParts[0].trim()),
+                    let endWeek = Int(rangeParts[1].trim())
+                else {
+                    throw EduHelperError.courseScheduleRetrievalFailed(
+                        "Invalid week range format: \(weekSection)")
+                }
+                if startWeek > endWeek {
+                    throw EduHelperError.courseScheduleRetrievalFailed(
+                        "Start week \(startWeek) is greater than end week \(endWeek).")
+                }
+                switch weekType {
+                case .single:
+                    weeks.append(contentsOf: (startWeek...endWeek).filter { $0 % 2 != 0 })
+                case .double:
+                    weeks.append(contentsOf: (startWeek...endWeek).filter { $0 % 2 == 0 })
+                case .all:
+                    weeks.append(contentsOf: startWeek...endWeek)
+                }
+            } else {
+                if let week = Int(weekSection) {
+                    weeks.append(week)
+                } else {
+                    throw EduHelperError.courseScheduleRetrievalFailed(
+                        "Invalid week format: \(weekSection)")
+                }
+            }
+        }
+
+        for section in sectionPart.components(separatedBy: "-") {
+            let sectionText = section.trimmingPrefix("0")
+            guard let sectionNumber = Int(sectionText) else {
+                throw EduHelperError.courseScheduleRetrievalFailed(
+                    "Invalid section format: \(sectionText)")
+            }
+            sections.append(sectionNumber)
+        }
+
+        return (weeks, sections)
+    }
+
+    private func parseCourse(element: Element, dayOfWeek: Int) throws -> [CourseSchedule] {
+        guard !(try element.text().trim().isEmpty) else {
+            return []
+        }
+
+        try element.select(".kbcontent1").remove()
+        let elementText = try element.text().trim()
+        let courseCount = elementText.components(separatedBy: "---------------------").count
+
+        guard let contentElement = try element.select("div.kbcontent").first() else {
+            throw EduHelperError.courseScheduleRetrievalFailed("Course content element not found")
+        }
+        let textNodes = contentElement.textNodes()
+        var courseNames: [String] = []
+        for i in stride(from: 0, to: textNodes.count, by: 2) {
+            let courseName = textNodes[i].text().trim()
+            if !courseName.isEmpty {
+                courseNames.append(courseName)
+            }
+        }
+
+        let teacherNodes = try contentElement.select("font[title='老师']")
+        var teachers: [String] = []
+        for teacherNode in teacherNodes {
+            let teacherName = try teacherNode.text().trim()
+            if !teacherName.isEmpty {
+                teachers.append(teacherName)
+            }
+        }
+
+        let classroomNodes = try contentElement.select("font[title='教室']")
+        var classrooms: [String] = []
+        for classroomNode in classroomNodes {
+            let classroom = try classroomNode.text().trim()
+            if !classroom.isEmpty {
+                classrooms.append(classroom)
+            }
+        }
+
+        let dateNodes = try contentElement.select("font[title='周次(节次)']")
+        var dates: [([Int], [Int])] = []
+        for dateNode in dateNodes {
+            let dateText = try dateNode.text().trim()
+            if !dateText.isEmpty {
+                dates.append(try parseDate(date: dateText))
+            }
+        }
+
+        guard courseCount == courseNames.count, courseCount == teachers.count,
+            courseCount == classrooms.count, courseCount == dates.count
+        else {
+            throw EduHelperError.courseScheduleRetrievalFailed(
+                "Mismatch in course count: \(courseCount), names: \(courseNames.count), teachers: \(teachers.count), classrooms: \(classrooms.count), weeks: \(dates.count)"
+            )
+        }
+
+        var courseSchedules: [CourseSchedule] = []
+        for i in 0..<courseCount {
+            let (weeks, sections) = dates[i]
+            let courseSchedule = CourseSchedule(
+                courseName: courseNames[i],
+                teacherName: teachers[i],
+                weeks: weeks,
+                sections: sections,
+                classroom: classrooms[i],
+                dayOfWeek: dayOfWeek
+            )
+            courseSchedules.append(courseSchedule)
+        }
+
+        return courseSchedules
+    }
+
+    func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [CourseSchedule] {
+        let queryParams: [String: String] = ["xnxq01id": academicYearSemester ?? ""]
+        let response = try await performRequest(
+            "http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do", .post, queryParams)
+        let document = try SwiftSoup.parse(response)
+
+        guard let table = try document.select("#kbtable").first() else {
+            throw EduHelperError.courseScheduleRetrievalFailed("Course schedule table not found")
+        }
+
+        var courseSchedules: [CourseSchedule] = []
+
+        let rows = try table.select("tr")
+        for (index, row) in rows.enumerated() {
+            guard index > 0 else { continue }
+            guard index < rows.count - 1 else { continue }
+            let cols = try row.select("td")
+            for (colIndex, col) in cols.enumerated() {
+                courseSchedules.append(
+                    contentsOf: try parseCourse(element: col, dayOfWeek: colIndex))
+            }
+        }
+
+        return courseSchedules
+    }
+
+    func getAvailableSemestersForCourseSchedule() async throws -> ([String], String) {
+        let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do")
+        let document = try SwiftSoup.parse(response)
+
+        guard let semesterSelect = try document.select("#xnxq01id").first() else {
+            throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed(
+                "Semester select element not found")
+        }
+
+        let options = try semesterSelect.select("option")
+        var semesters: [String] = []
+        var defaultSemester: String?
+
+        for option in options {
+            let name = try option.text().trim()
+            if option.hasAttr("selected") {
+                defaultSemester = name
+            }
+            semesters.append(name)
+        }
+
+        guard !semesters.isEmpty else {
+            throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed(
+                "No semesters found in the select element")
+        }
+
+        guard let defaultSemester = defaultSemester else {
+            throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed(
+                "Default semester not found")
+        }
+
+        return (semesters, defaultSemester)
     }
 }

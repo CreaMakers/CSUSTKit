@@ -2,7 +2,7 @@ import Alamofire
 import Foundation
 import SwiftSoup
 
-@available(macOS 10.15, *)
+@available(macOS 13.0, *)
 class EduHelper {
     var session: Session
 

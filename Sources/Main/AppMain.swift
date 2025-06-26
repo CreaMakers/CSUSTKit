@@ -6,7 +6,7 @@ func loadAccount() -> (String?, String?) {
     return (environment?["CSUST_USERNAME"], environment?["CSUST_PASSWORD"])
 }
 
-@available(macOS 10.15, *)
+@available(macOS 13.0, *)
 @main
 struct Main {
     static func main() async {
@@ -34,6 +34,11 @@ struct Main {
                 let gradeDetail = try await eduHelper.courseService.getGradeDetail(
                     url: grade.gradeDetailUrl)
                 debugPrint(gradeDetail)
+            }
+
+            let schedules = try await eduHelper.courseService.getCourseSchedule()
+            for schedule in schedules {
+                debugPrint(schedule)
             }
 
             try await eduHelper.authService.logout()

@@ -1,10 +1,6 @@
 import SwiftSoup
 
-protocol ProfileServiceProtocol {
-    func getProfile() async throws -> Profile
-}
-
-class ProfileService: BaseService, ProfileServiceProtocol {
+class ProfileService: BaseService {
     /**
      * 获取学生档案信息
      * - Returns: 学生档案信息
