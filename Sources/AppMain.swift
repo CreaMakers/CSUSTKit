@@ -20,10 +20,9 @@ struct Main {
 
             try await eduHelper.login(username: username, password: password)
 
-            let exams = try await eduHelper.getExamSchedule(
-                academicYearSemester: nil, semesterType: nil)
-            for exam in exams {
-                debugPrint(exam)
+            let courseGrades = try await eduHelper.getCourseGrades()
+            for grade in courseGrades {
+                debugPrint(grade)
             }
 
             try await eduHelper.logout()
