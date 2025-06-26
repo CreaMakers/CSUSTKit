@@ -183,7 +183,7 @@ class CourseService: BaseService, CourseServiceProtocol {
             let type = try headerCols[i].text().trim()
             let grade = try valueCols[i].text().trim()
             let ratio = try valueCols[i + 1].text().trim()
-            guard let gradeValue = Int(grade) else {
+            guard let gradeValue = Double(grade) else {
                 throw EduHelperError.gradeDetailRetrievalFailed("Invalid grade format: \(grade)")
             }
             let component = GradeComponent(

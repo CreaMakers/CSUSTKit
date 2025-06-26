@@ -3,7 +3,7 @@ struct GradeComponent {
     /// 成绩类型
     let type: String
     /// 成绩
-    let grade: Int
+    let grade: Double
     /// 成绩比例
     let ratio: String
 }
