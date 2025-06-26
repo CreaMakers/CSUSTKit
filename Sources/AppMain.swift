@@ -19,12 +19,6 @@ struct Main {
             }
 
             try await eduHelper.login(username: username, password: password)
-
-            let courseGrades = try await eduHelper.getCourseGrades()
-            for grade in courseGrades {
-                debugPrint(grade)
-            }
-
             try await eduHelper.logout()
         } catch {
             print("Error: \(error)")

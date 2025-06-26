@@ -10,6 +10,7 @@ enum EduHelperError: Error {
     case availableSemestersForExamScheduleRetrievalFailed(String)
     case courseGradesRetrievalFailed(String)
     case availableSemestersForCourseGradesRetrievalFailed(String)
+    case gradeDetailRetrievalFailed(String)
 }
 
 /// 学生档案信息
@@ -143,6 +144,8 @@ struct CourseGrade {
     let groupName: String
     /// 成绩
     let grade: Int
+    /// 详细成绩链接
+    let gradeDetailUrl: String
     /// 修读方式
     let studyMode: String
     /// 成绩标识
@@ -198,6 +201,24 @@ enum StudyMode: String {
             return "2"
         }
     }
+}
+
+/// 成绩组成
+struct GradeComponent {
+    /// 成绩类型
+    let type: String
+    /// 成绩
+    let grade: Int
+    /// 成绩比例
+    let ratio: String
+}
+
+/// 成绩详情
+struct GradeDetail {
+    /// 成绩组成
+    let components: [GradeComponent]
+    /// 总成绩
+    let totalGrade: Int
 }
 
 @available(macOS 10.15, *)
@@ -542,6 +563,15 @@ class EduHelper {
                 throw EduHelperError.courseGradesRetrievalFailed(
                     "Invalid grade format: \(gradeString)")
             }
+            let gradeDetailUrl = try cols[5].select("a").first()?.attr("href").trimmingCharacters(
+                in: .whitespacesAndNewlines)
+            guard var gradeDetailUrl = gradeDetailUrl else {
+                throw EduHelperError.courseGradesRetrievalFailed("Grade detail URL not found")
+            }
+            gradeDetailUrl =
+                gradeDetailUrl
+                .replacingOccurrences(of: "javascript:openWindow('", with: "http://xk.csust.edu.cn")
+                .replacingOccurrences(of: "',700,500)", with: "")
             let studyMode = try cols[6].text().trimmingCharacters(in: .whitespacesAndNewlines)
             let gradeIdentifier = try cols[7].text().trimmingCharacters(in: .whitespacesAndNewlines)
             let creditString = try cols[8].text().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -581,6 +611,7 @@ class EduHelper {
                 courseName: courseName,
                 groupName: groupName,
                 grade: grade,
+                gradeDetailUrl: gradeDetailUrl,
                 studyMode: studyMode,
                 gradeIdentifier: gradeIdentifier,
                 credit: credit,
@@ -628,5 +659,58 @@ class EduHelper {
         }
 
         return semesters
+    }
+
+    func getGradeDetail(url: String) async throws -> GradeDetail {
+        let response = try await session.request(url).serializingString().value
+        guard !isLoginRequired(response: response) else {
+            throw EduHelperError.notLoggedIn("User is not logged in")
+        }
+
+        let document = try SwiftSoup.parse(response)
+        guard let table = try document.select("#dataList").first() else {
+            throw EduHelperError.gradeDetailRetrievalFailed("Grade detail table not found")
+        }
+        let rows = try table.select("tr")
+        guard rows.count >= 2 else {
+            throw EduHelperError.gradeDetailRetrievalFailed(
+                "Grade detail table does not contain enough rows")
+        }
+        let headerRow = rows[0]
+        let headerCols = try headerRow.select("th")
+        let valueRow = rows[1]
+        let valueCols = try valueRow.select("td")
+
+        guard headerCols.count >= 4, valueCols.count >= 4 else {
+            throw EduHelperError.gradeDetailRetrievalFailed(
+                "Grade detail table does not contain enough columns: \(headerCols.count), \(valueCols.count)"
+            )
+        }
+
+        var components: [GradeComponent] = []
+
+        for i in stride(from: 1, to: headerCols.count - 1, by: 2) {
+            let type = try headerCols[i].text().trimmingCharacters(in: .whitespacesAndNewlines)
+            let grade = try valueCols[i].text().trimmingCharacters(in: .whitespacesAndNewlines)
+            let ratio = try valueCols[i + 1].text().trimmingCharacters(
+                in: .whitespacesAndNewlines)
+            guard let gradeValue = Int(grade) else {
+                throw EduHelperError.gradeDetailRetrievalFailed("Invalid grade format: \(grade)")
+            }
+            let component = GradeComponent(
+                type: type,
+                grade: gradeValue,
+                ratio: ratio
+            )
+            components.append(component)
+        }
+
+        let totalGrade = try valueCols.last()?.text().trimmingCharacters(
+            in: .whitespacesAndNewlines)
+        guard let totalGradeString = totalGrade, let totalGradeValue = Int(totalGradeString) else {
+            throw EduHelperError.gradeDetailRetrievalFailed(
+                "Invalid total grade format: \(String(describing: totalGrade))")
+        }
+        return GradeDetail(components: components, totalGrade: totalGradeValue)
     }
 }
