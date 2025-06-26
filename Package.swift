@@ -8,15 +8,17 @@ let package = Package(
         .macOS(.v10_15)
     ],
     dependencies: [
-        .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.10.0")),
-        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.7.6"),
+        .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.10.2")),
+        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.8.8"),
+        .package(url: "https://github.com/juri/dotenvy.git", from: "0.3.0"),
     ],
     targets: [
         .executableTarget(
             name: "csust-api-swift",
             dependencies: [
-                .product(name: "Alamofire", package: "Alamofire"),
-                .product(name: "SwiftSoup", package: "SwiftSoup"),
+                .product(name: "Alamofire", package: "alamofire"),
+                .product(name: "SwiftSoup", package: "swiftsoup"),
+                .product(name: "DotEnvy", package: "dotenvy"),
             ],
         )
     ]

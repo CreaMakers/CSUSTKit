@@ -1,5 +1,5 @@
 {
-  "originHash" : "d1d61b9cd2f8cbd40b4c56d20ba75c1785ea4dcfaa6ef95b42db36cbaa91938a",
+  "originHash" : "aa5c4133239499beca1fa29ba72cdf87315c9305ded0bf82d5a5e281ae7d3939",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -8,6 +8,24 @@
       "state" : {
         "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
         "version" : "5.10.2"
+      }
+    },
+    {
+      "identity" : "dotenvy",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/juri/dotenvy.git",
+      "state" : {
+        "revision" : "448b452aeb12f8a49264b912f76f40d76093af3a",
+        "version" : "0.3.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "011f0c765fb46d9cac61bca19be0527e99c98c8b",
+        "version" : "1.5.1"
       }
     },
     {
