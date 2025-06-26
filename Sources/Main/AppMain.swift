@@ -18,8 +18,12 @@ struct Main {
                 return
             }
 
-            try await eduHelper.login(username: username, password: password)
-            try await eduHelper.logout()
+            try await eduHelper.authService.login(username: username, password: password)
+
+            let profile = try await eduHelper.profileService.getProfile()
+            debugPrint(profile)
+
+            try await eduHelper.authService.logout()
         } catch {
             print("Error: \(error)")
         }
