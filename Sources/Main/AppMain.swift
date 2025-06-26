@@ -23,6 +23,19 @@ struct Main {
             let profile = try await eduHelper.profileService.getProfile()
             debugPrint(profile)
 
+            let exams = try await eduHelper.examService.getExamSchedule()
+            for exam in exams {
+                debugPrint(exam)
+            }
+
+            let grades = try await eduHelper.courseService.getCourseGrades()
+            for grade in grades {
+                debugPrint(grade)
+                let gradeDetail = try await eduHelper.courseService.getGradeDetail(
+                    url: grade.gradeDetailUrl)
+                debugPrint(gradeDetail)
+            }
+
             try await eduHelper.authService.logout()
         } catch {
             print("Error: \(error)")

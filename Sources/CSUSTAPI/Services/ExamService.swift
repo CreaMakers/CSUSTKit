@@ -32,14 +32,8 @@ class ExamService: BaseService, ExamServiceProtocol {
             "xnxqid": queryAcademicYearSemester,
             "xqlb": semesterType?.id ?? "",
         ]
-        let response = try await session.request(
-            "http://xk.csust.edu.cn/jsxsd/xsks/xsksap_list", method: .post, parameters: queryParams,
-            encoding: URLEncoding.default
-        )
-        .serializingString().value
-        guard !isLoginRequired(response: response) else {
-            throw EduHelperError.notLoggedIn("User is not logged in")
-        }
+        let response = try await performRequest(
+            "http://xk.csust.edu.cn/jsxsd/xsks/xsksap_list", .post, queryParams)
 
         let document = try SwiftSoup.parse(response)
         guard let table = try document.select("#dataList").first() else {
@@ -83,11 +77,8 @@ class ExamService: BaseService, ExamServiceProtocol {
      * - Returns: 包含所有可用学期的数组和默认学期
      */
     func getAvailableSemestersForExamSchedule() async throws -> ([String], String) {
-        let response = try await session.request("http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
-            .serializingString().value
-        guard !isLoginRequired(response: response) else {
-            throw EduHelperError.notLoggedIn("User is not logged in")
-        }
+        let response = try await performRequest(
+            "http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
 
         let document = try SwiftSoup.parse(response)
         guard let semesterSelect = try document.select("#xnxqid").first() else {

@@ -10,13 +10,9 @@ class ProfileService: BaseService, ProfileServiceProtocol {
      * - Returns: 学生档案信息
      */
     func getProfile() async throws -> Profile {
-        let profileResponse = try await session.request("http://xk.csust.edu.cn/jsxsd/grxx/xsxx")
-            .serializingString().value
-        guard !isLoginRequired(response: profileResponse) else {
-            throw EduHelperError.notLoggedIn("User is not logged in")
-        }
+        let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/grxx/xsxx")
 
-        let document = try SwiftSoup.parse(profileResponse)
+        let document = try SwiftSoup.parse(response)
         guard let table = try document.select("#xjkpTable > tbody").first() else {
             throw EduHelperError.profileRetrievalFailed("Profile table not found")
         }

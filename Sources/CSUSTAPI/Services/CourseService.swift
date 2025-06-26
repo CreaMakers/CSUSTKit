@@ -34,13 +34,8 @@ class CourseService: BaseService, CourseServiceProtocol {
             "xsfs": displayMode.id,
             "fxkc": studyMode.id,
         ]
-        let response = try await session.request(
-            "http://xk.csust.edu.cn/jsxsd/kscj/cjcx_list", method: .post, parameters: queryParams,
-            encoding: URLEncoding.default
-        ).serializingString().value
-        guard !isLoginRequired(response: response) else {
-            throw EduHelperError.notLoggedIn("User is not logged in")
-        }
+        let response = try await performRequest(
+            "http://xk.csust.edu.cn/jsxsd/kscj/cjcx_list", .post, queryParams)
 
         let document = try SwiftSoup.parse(response)
 
@@ -138,11 +133,7 @@ class CourseService: BaseService, CourseServiceProtocol {
      * - Returns: 包含所有可用学期的数组
      */
     func getAvailableSemestersForCourseGrades() async throws -> [String] {
-        let response = try await session.request("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_query")
-            .serializingString().value
-        guard !isLoginRequired(response: response) else {
-            throw EduHelperError.notLoggedIn("User is not logged in")
-        }
+        let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_list")
 
         let document = try SwiftSoup.parse(response)
         guard let semesterSelect = try document.select("#kksj").first() else {
@@ -164,10 +155,7 @@ class CourseService: BaseService, CourseServiceProtocol {
     }
 
     func getGradeDetail(url: String) async throws -> GradeDetail {
-        let response = try await session.request(url).serializingString().value
-        guard !isLoginRequired(response: response) else {
-            throw EduHelperError.notLoggedIn("User is not logged in")
-        }
+        let response = try await performRequest(url)
 
         let document = try SwiftSoup.parse(response)
         guard let table = try document.select("#dataList").first() else {

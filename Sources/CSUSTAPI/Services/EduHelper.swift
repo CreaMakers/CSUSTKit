@@ -6,10 +6,10 @@ import SwiftSoup
 class EduHelper {
     var session: Session
 
-    let authService: AuthServiceProtocol
-    let courseService: CourseServiceProtocol
-    let examService: ExamServiceProtocol
-    let profileService: ProfileServiceProtocol
+    let authService: AuthService
+    let courseService: CourseService
+    let examService: ExamService
+    let profileService: ProfileService
 
     init() {
         session = Session()
