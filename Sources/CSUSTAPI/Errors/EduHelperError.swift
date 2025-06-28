@@ -9,4 +9,6 @@ enum EduHelperError: Error {
     case gradeDetailRetrievalFailed(String)
     case courseScheduleRetrievalFailed(String)
     case availableSemestersForCourseScheduleRetrievalFailed(String)
+    case semesterStartDateRetrievalFailed(String)
+    case availableSemestersForStartDateRetrievalFailed(String)
 }

@@ -335,6 +335,11 @@ class CourseService: BaseService {
         return courseSchedules
     }
 
+    /**
+     * 获取课程表
+     * - Parameter academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则查询默认学期
+     * - Returns: 课程信息数组
+     */
     func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [Course] {
         let queryParams: [String: String] = ["xnxq01id": academicYearSemester ?? ""]
         let response = try await performRequest(
@@ -385,6 +390,10 @@ class CourseService: BaseService {
         return Array(courseDictionary.values)
     }
 
+    /**
+     * 获取课程表的所有可用学期
+     * - Returns: 包含所有可用学期的数组和默认学期
+     */
     func getAvailableSemestersForCourseSchedule() async throws -> ([String], String) {
         let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do")
         let document = try SwiftSoup.parse(response)

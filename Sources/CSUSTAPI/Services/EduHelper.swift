@@ -10,6 +10,7 @@ class EduHelper {
     let courseService: CourseService
     let examService: ExamService
     let profileService: ProfileService
+    let semesterService: SemesterService
 
     init() {
         session = Session()
@@ -18,5 +19,6 @@ class EduHelper {
         courseService = CourseService(session: session)
         examService = ExamService(session: session)
         profileService = ProfileService(session: session)
+        semesterService = SemesterService(session: session)
     }
 }
