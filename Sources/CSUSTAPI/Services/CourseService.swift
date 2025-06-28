@@ -255,10 +255,9 @@ class CourseService: BaseService {
         }
 
         for section in sectionPart.components(separatedBy: "-") {
-            let sectionText = section.trimmingPrefix("0")
-            guard let sectionNumber = Int(sectionText) else {
+            guard let sectionNumber = Int(section) else {
                 throw EduHelperError.courseScheduleRetrievalFailed(
-                    "Invalid section format: \(sectionText)")
+                    "Invalid section format: \(section)")
             }
             sections.append(sectionNumber)
         }
@@ -354,10 +353,15 @@ class CourseService: BaseService {
             guard rowIndex < rows.count - 1 else { continue }
             let cols = try row.select("td")
             for (colIndex, col) in cols.enumerated() {
+                guard let day = DayOfWeek(rawValue: colIndex) else {
+                    throw EduHelperError.courseScheduleRetrievalFailed(
+                        "Invalid day of week index: \(colIndex)")
+                }
+
                 let parsedItems = try parseCourse(element: col)
                 for item in parsedItems {
                     let newSession = ScheduleSession(
-                        weeks: item.weeks, sections: item.sections, dayOfWeek: colIndex,
+                        weeks: item.weeks, sections: item.sections, dayOfWeek: day,
                         classroom: item.classroom)
 
                     if var existingCourse = courseDictionary[item.courseName] {

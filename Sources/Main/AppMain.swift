@@ -20,9 +20,19 @@ struct Main {
 
             try await eduHelper.authService.login(username: username, password: password)
 
-            let courses = try await eduHelper.courseService.getCourseSchedule()
+            let courses = try await eduHelper.courseService.getCourseSchedule(
+                academicYearSemester: "2025-2026-1")
             for course in courses {
-                debugPrint(course)
+                print("Course Name: \(course.courseName)")
+                print("Group Name: \(course.groupName ?? "N/A")")
+                print("Teacher: \(course.teacher)")
+                print("Sessions:")
+                for session in course.sessions {
+                    print(
+                        "  Weeks: \(session.weeks) Sections: \(session.sections) Day of Week: \(session.dayOfWeek) Classroom: \(session.classroom ?? "N/A")"
+                    )
+                }
+                print("-----------------------------")
             }
 
             try await eduHelper.authService.logout()
