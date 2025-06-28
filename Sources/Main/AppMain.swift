@@ -20,25 +20,9 @@ struct Main {
 
             try await eduHelper.authService.login(username: username, password: password)
 
-            let profile = try await eduHelper.profileService.getProfile()
-            debugPrint(profile)
-
-            let exams = try await eduHelper.examService.getExamSchedule()
-            for exam in exams {
-                debugPrint(exam)
-            }
-
-            let grades = try await eduHelper.courseService.getCourseGrades()
-            for grade in grades {
-                debugPrint(grade)
-                let gradeDetail = try await eduHelper.courseService.getGradeDetail(
-                    url: grade.gradeDetailUrl)
-                debugPrint(gradeDetail)
-            }
-
-            let schedules = try await eduHelper.courseService.getCourseSchedule()
-            for schedule in schedules {
-                debugPrint(schedule)
+            let courses = try await eduHelper.courseService.getCourseSchedule()
+            for course in courses {
+                debugPrint(course)
             }
 
             try await eduHelper.authService.logout()

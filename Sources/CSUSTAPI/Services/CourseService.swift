@@ -195,7 +195,6 @@ class CourseService: BaseService {
     }
 
     private func parseDate(date: String) throws -> ([Int], [Int]) {
-        // 周 单周 双周
         enum WeekType: String, CaseIterable {
             case single = "(单周)"
             case double = "(双周)"
@@ -267,80 +266,77 @@ class CourseService: BaseService {
         return (weeks, sections)
     }
 
-    private func parseCourse(element: Element, dayOfWeek: Int) throws -> [CourseSchedule] {
+    private struct ParsedItem {
+        let courseName: String
+        let groupName: String?
+        let teacherName: String
+        let weeks: [Int]
+        let sections: [Int]
+        let classroom: String?
+    }
+
+    private func parseCourse(element: Element) throws -> [ParsedItem] {
         guard !(try element.text().trim().isEmpty) else {
             return []
         }
 
-        try element.select(".kbcontent1").remove()
-        let elementText = try element.text().trim()
-        let courseCount = elementText.components(separatedBy: "---------------------").count
-
         guard let contentElement = try element.select("div.kbcontent").first() else {
             throw EduHelperError.courseScheduleRetrievalFailed("Course content element not found")
         }
-        let textNodes = contentElement.textNodes()
-        var courseNames: [String] = []
-        for i in stride(from: 0, to: textNodes.count, by: 2) {
-            let courseName = textNodes[i].text().trim()
-            if !courseName.isEmpty {
-                courseNames.append(courseName)
-            }
-        }
 
-        let teacherNodes = try contentElement.select("font[title='老师']")
-        var teachers: [String] = []
-        for teacherNode in teacherNodes {
-            let teacherName = try teacherNode.text().trim()
-            if !teacherName.isEmpty {
-                teachers.append(teacherName)
-            }
-        }
+        var courseSchedules: [ParsedItem] = []
 
-        let classroomNodes = try contentElement.select("font[title='教室']")
-        var classrooms: [String] = []
-        for classroomNode in classroomNodes {
-            let classroom = try classroomNode.text().trim()
-            if !classroom.isEmpty {
-                classrooms.append(classroom)
-            }
-        }
+        let courseHTMLs = try contentElement.html().components(separatedBy: "---------------------")
 
-        let dateNodes = try contentElement.select("font[title='周次(节次)']")
-        var dates: [([Int], [Int])] = []
-        for dateNode in dateNodes {
-            let dateText = try dateNode.text().trim()
-            if !dateText.isEmpty {
-                dates.append(try parseDate(date: dateText))
-            }
-        }
+        for courseHTML in courseHTMLs {
+            let trimmedHTML = courseHTML.trim()
+            guard !trimmedHTML.isEmpty else { continue }
 
-        guard courseCount == courseNames.count, courseCount == teachers.count,
-            courseCount == classrooms.count, courseCount == dates.count
-        else {
-            throw EduHelperError.courseScheduleRetrievalFailed(
-                "Mismatch in course count: \(courseCount), names: \(courseNames.count), teachers: \(teachers.count), classrooms: \(classrooms.count), weeks: \(dates.count)"
+            let courseFragment = try SwiftSoup.parseBodyFragment(trimmedHTML)
+            guard let courseBody = try courseFragment.select("body").first() else {
+                throw EduHelperError.courseScheduleRetrievalFailed("Course body not found")
+            }
+
+            guard let courseName = courseBody.textNodes().first?.text().trim() else {
+                throw EduHelperError.courseScheduleRetrievalFailed("Course name not found")
+            }
+
+            var groupName: String? = nil
+            if courseBody.textNodes().count > 1 && !courseBody.textNodes()[1].text().trim().isEmpty
+            {
+                groupName = courseBody.textNodes()[1].text().trim()
+            }
+
+            guard let teacherName = try courseBody.select("font[title='老师']").first()?.text()
+            else {
+                throw EduHelperError.courseScheduleRetrievalFailed("Teacher name not found")
+            }
+            let classroom = try courseBody.select("font[title='教室']").first()?.text()
+            guard let dateText = try courseBody.select("font[title='周次(节次)']").first()?.text()
+            else {
+                throw EduHelperError.courseScheduleRetrievalFailed("Date text not found")
+            }
+            let (weeks, sections) = try parseDate(date: dateText)
+            guard !weeks.isEmpty, !sections.isEmpty else {
+                throw EduHelperError.courseScheduleRetrievalFailed("Invalid weeks or sections")
+            }
+
+            courseSchedules.append(
+                ParsedItem(
+                    courseName: courseName,
+                    groupName: groupName,
+                    teacherName: teacherName,
+                    weeks: weeks,
+                    sections: sections,
+                    classroom: classroom
+                )
             )
-        }
-
-        var courseSchedules: [CourseSchedule] = []
-        for i in 0..<courseCount {
-            let (weeks, sections) = dates[i]
-            let courseSchedule = CourseSchedule(
-                courseName: courseNames[i],
-                teacherName: teachers[i],
-                weeks: weeks,
-                sections: sections,
-                classroom: classrooms[i],
-                dayOfWeek: dayOfWeek
-            )
-            courseSchedules.append(courseSchedule)
         }
 
         return courseSchedules
     }
 
-    func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [CourseSchedule] {
+    func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [Course] {
         let queryParams: [String: String] = ["xnxq01id": academicYearSemester ?? ""]
         let response = try await performRequest(
             "http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do", .post, queryParams)
@@ -350,20 +346,39 @@ class CourseService: BaseService {
             throw EduHelperError.courseScheduleRetrievalFailed("Course schedule table not found")
         }
 
-        var courseSchedules: [CourseSchedule] = []
+        var courseDictionary: [String: Course] = [:]
 
         let rows = try table.select("tr")
-        for (index, row) in rows.enumerated() {
-            guard index > 0 else { continue }
-            guard index < rows.count - 1 else { continue }
+        for (rowIndex, row) in rows.enumerated() {
+            guard rowIndex > 0 else { continue }
+            guard rowIndex < rows.count - 1 else { continue }
             let cols = try row.select("td")
             for (colIndex, col) in cols.enumerated() {
-                courseSchedules.append(
-                    contentsOf: try parseCourse(element: col, dayOfWeek: colIndex))
+                let parsedItems = try parseCourse(element: col)
+                for item in parsedItems {
+                    let newSession = ScheduleSession(
+                        weeks: item.weeks, sections: item.sections, dayOfWeek: colIndex,
+                        classroom: item.classroom)
+
+                    if var existingCourse = courseDictionary[item.courseName] {
+                        if !existingCourse.sessions.contains(newSession) {
+                            existingCourse.sessions.append(newSession)
+                        }
+                        courseDictionary[item.courseName] = existingCourse
+                    } else {
+                        let newCourse = Course(
+                            courseName: item.courseName,
+                            groupName: item.groupName,
+                            teacher: item.teacherName,
+                            sessions: [newSession]
+                        )
+                        courseDictionary[item.courseName] = newCourse
+                    }
+                }
             }
         }
 
-        return courseSchedules
+        return Array(courseDictionary.values)
     }
 
     func getAvailableSemestersForCourseSchedule() async throws -> ([String], String) {
