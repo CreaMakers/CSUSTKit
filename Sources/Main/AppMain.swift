@@ -11,6 +11,7 @@ func loadAccount() -> (String?, String?) {
 struct Main {
     static func main() async {
         let eduHelper = EduHelper()
+        let financeHelper = FinanceHelper()
         do {
             let (username, password) = loadAccount()
             guard let username = username, let password = password else {
@@ -19,11 +20,10 @@ struct Main {
             }
 
             try await eduHelper.authService.login(username: username, password: password)
-
-            let date = try await eduHelper.semesterService.getSemesterStartDate()
-            debugPrint(date.formatted())
-
             try await eduHelper.authService.logout()
+
+            let result = try await financeHelper.getBuildings(for: .yuntang)
+            debugPrint(result)
         } catch {
             print("Error: \(error)")
         }
