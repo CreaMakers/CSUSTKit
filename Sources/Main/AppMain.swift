@@ -22,8 +22,10 @@ struct Main {
             try await eduHelper.authService.login(username: username, password: password)
             try await eduHelper.authService.logout()
 
-            let result = try await financeHelper.getBuildings(for: .yuntang)
-            debugPrint(result)
+            let building = Building(name: "西苑11栋", id: "75", campus: .jinpenling)
+            let electricity = try await financeHelper.getElectricity(
+                building: building, room: "233")
+            debugPrint(electricity)
         } catch {
             print("Error: \(error)")
         }
