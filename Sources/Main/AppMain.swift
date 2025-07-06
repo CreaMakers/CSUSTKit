@@ -21,6 +21,12 @@ struct Main {
 
             try await ssoHelper.login(username: username, password: password)
             debugPrint(try await ssoHelper.getLoginUser())
+
+            let session = try await ssoHelper.loginToEducation()
+            let eduHelper = EduHelper(session: session)
+
+            debugPrint(try await eduHelper.profileService.getProfile())
+
             try await ssoHelper.logout()
         } catch {
             print("Error: \(error)")

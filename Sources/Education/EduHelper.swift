@@ -11,8 +11,8 @@ class EduHelper {
     let profileService: ProfileService
     let semesterService: SemesterService
 
-    init() {
-        session = Session()
+    init(session: Session = Session()) {
+        self.session = session
 
         authService = AuthService(session: session)
         courseService = CourseService(session: session)
