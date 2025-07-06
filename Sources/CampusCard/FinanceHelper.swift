@@ -1,7 +1,7 @@
 import Alamofire
 import Foundation
 
-class FinanceHelper {
+class CampusCardHelper {
     let session: Session = Session()
 
     func getBuildings(for campus: Campus) async throws -> [Building] {
@@ -44,7 +44,7 @@ class FinanceHelper {
         let jsonEncoder = JSONEncoder()
         let jsonData = try jsonEncoder.encode(requestDict)
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-            throw FinanceHelperError.buildingRetrievalFailed("Failed to encode JSON")
+            throw CampusCardHelperError.buildingRetrievalFailed("Failed to encode JSON")
         }
 
         let parameters: [String: String] = [
@@ -59,7 +59,7 @@ class FinanceHelper {
         ).serializingDecodable(BuildingResponse.self).value
 
         guard let buildingTab = responseData.queryElecBuilding.buildingtab else {
-            throw FinanceHelperError.buildingRetrievalFailed(
+            throw CampusCardHelperError.buildingRetrievalFailed(
                 "No buildings found for campus \(campus.displayName)")
         }
 
@@ -132,7 +132,7 @@ class FinanceHelper {
         let jsonEncoder = JSONEncoder()
         let jsonData = try jsonEncoder.encode(requestDict)
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-            throw FinanceHelperError.electricityRetrievalFailed("Failed to encode JSON")
+            throw CampusCardHelperError.electricityRetrievalFailed("Failed to encode JSON")
         }
 
         let parameters: [String: String] = [
@@ -146,17 +146,17 @@ class FinanceHelper {
         ).serializingDecodable(BuildingResponse.self).value
 
         guard let errmsg = responseData.queryElecRoomInfo.errmsg else {
-            throw FinanceHelperError.electricityRetrievalFailed("No error message found")
+            throw CampusCardHelperError.electricityRetrievalFailed("No error message found")
         }
 
         guard errmsg.contains("房间当前剩余电量") else {
-            throw FinanceHelperError.electricityRetrievalFailed(
+            throw CampusCardHelperError.electricityRetrievalFailed(
                 "Unexpected error message: \(errmsg)"
             )
         }
 
         guard let electricity = Double(errmsg.replacingOccurrences(of: "房间当前剩余电量", with: "")) else {
-            throw FinanceHelperError.electricityRetrievalFailed(
+            throw CampusCardHelperError.electricityRetrievalFailed(
                 "Failed to parse electricity value from message: \(errmsg)"
             )
         }

@@ -11,7 +11,7 @@ func loadAccount() -> (String?, String?) {
 struct Main {
     static func main() async {
         let eduHelper = EduHelper()
-        let financeHelper = FinanceHelper()
+        let campusCardHelper = CampusCardHelper()
         do {
             let (username, password) = loadAccount()
             guard let username = username, let password = password else {
@@ -20,10 +20,11 @@ struct Main {
             }
 
             try await eduHelper.authService.login(username: username, password: password)
+            debugPrint(try await eduHelper.profileService.getProfile())
             try await eduHelper.authService.logout()
 
             let building = Building(name: "西苑11栋", id: "75", campus: .jinpenling)
-            let electricity = try await financeHelper.getElectricity(
+            let electricity = try await campusCardHelper.getElectricity(
                 building: building, room: "233")
             debugPrint(electricity)
         } catch {

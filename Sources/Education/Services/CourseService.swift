@@ -2,7 +2,6 @@ import Alamofire
 import Foundation
 import SwiftSoup
 
-@available(macOS 13.0, *)
 class CourseService: BaseService {
     /**
      * 获取课程成绩
