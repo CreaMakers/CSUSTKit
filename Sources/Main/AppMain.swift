@@ -22,10 +22,17 @@ struct Main {
             debugPrint(try await ssoHelper.getLoginUser())
 
             let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
+
             debugPrint(try await moocHelper.getProfile())
 
-            let eduHelper = EduHelper(session: try await ssoHelper.loginToEducation())
-            debugPrint(try await eduHelper.profileService.getProfile())
+            let courses = try await moocHelper.getCourses()
+            for course in courses {
+                debugPrint(course)
+            }
+
+            try await moocHelper.logout()
+
+            debugPrint(try await moocHelper.getProfile())
 
             try await ssoHelper.logout()
         } catch {
