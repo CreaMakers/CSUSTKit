@@ -4,18 +4,18 @@
       "type": "swift",
       "request": "launch",
       "args": [],
-      "cwd": "${workspaceFolder:csust-api-swift}",
+      "cwd": "${workspaceFolder:CSUSTKit}",
       "name": "Debug CSUSTKitExample",
-      "program": "${workspaceFolder:csust-api-swift}/.build/debug/CSUSTKitExample",
+      "program": "${workspaceFolder:CSUSTKit}/.build/debug/CSUSTKitExample",
       "preLaunchTask": "swift: Build Debug CSUSTKitExample"
     },
     {
       "type": "swift",
       "request": "launch",
       "args": [],
-      "cwd": "${workspaceFolder:csust-api-swift}",
+      "cwd": "${workspaceFolder:CSUSTKit}",
       "name": "Release CSUSTKitExample",
-      "program": "${workspaceFolder:csust-api-swift}/.build/release/CSUSTKitExample",
+      "program": "${workspaceFolder:CSUSTKit}/.build/release/CSUSTKitExample",
       "preLaunchTask": "swift: Build Release CSUSTKitExample"
     }
   ]
