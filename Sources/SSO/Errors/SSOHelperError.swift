@@ -5,4 +5,5 @@ enum SSOHelperError: Error {
     case loginToEducationFailed(String)
     case captchaRetrievalFailed(String)
     case dynamicCodeRetrievalFailed(String)
+    case loginToMoocFailed(String)
 }

@@ -130,34 +130,6 @@ class SSOHelper {
     }
 
     func loginToEducation() async throws -> Session {
-        struct LoginToEducationRequest: Encodable {
-            let method: String
-            let param: Param
-            struct Param: Encodable {
-                let id: String
-                let type: String
-            }
-        }
-        let loginToEducationRequest = LoginToEducationRequest(
-            method: "visitService",
-            param: LoginToEducationRequest.Param(
-                id: "1093931153952317440",
-                type: "service"
-            )
-        )
-        struct LoginToEducationResponse: Decodable {
-            let data: String
-        }
-
-        let loginToEducationResponse = try await session.request(
-            "https://ehall.csust.edu.cn/execTemplateMethod", method: .post,
-            parameters: loginToEducationRequest, encoder: JSONParameterEncoder.default,
-        ).serializingDecodable(LoginToEducationResponse.self).value
-
-        guard loginToEducationResponse.data == "success" else {
-            throw SSOHelperError.loginToEducationFailed("Login to education failed")
-        }
-
         _ = try await session.request("http://xk.csust.edu.cn/sso.jsp")
             .serializingString().value
         let response = try await session.request(
@@ -166,6 +138,22 @@ class SSOHelper {
 
         guard !response.contains("请输入账号") else {
             throw SSOHelperError.loginToEducationFailed("Login to education failed")
+        }
+
+        return session
+    }
+
+    func loginToMooc() async throws -> Session {
+        let request = session.request("http://pt.csust.edu.cn/meol/homepage/common/sso_login.jsp")
+        let response = await request.serializingString().response
+
+        guard let finalURL = response.response?.url else {
+            throw SSOHelperError.loginToMoocFailed("Login to Mooc failed, no redirect URL found")
+        }
+
+        guard finalURL == URL(string: "http://pt.csust.edu.cn/meol/personal.do") else {
+            throw SSOHelperError.loginToMoocFailed(
+                "Login to Mooc failed, unexpected redirect URL: \(finalURL)")
         }
 
         return session

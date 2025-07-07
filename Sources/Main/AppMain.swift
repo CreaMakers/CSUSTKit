@@ -9,8 +9,6 @@ func loadAccount() -> (String?, String?) {
 @main
 struct Main {
     static func main() async {
-        let eduHelper = EduHelper()
-        let campusCardHelper = CampusCardHelper()
         let ssoHelper = SSOHelper()
         do {
             let (username, password) = loadAccount()
@@ -19,31 +17,15 @@ struct Main {
                 return
             }
 
-            let data = try await ssoHelper.getCaptcha()
-
-            let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(
-                "captcha.png")
-            try data.write(to: fileURL)
-            debugPrint(fileURL)
-
-            print("Please enter the captcha code:")
-            guard let captcha = readLine(), !captcha.isEmpty else {
-                print("Captcha code cannot be empty.")
-                return
-            }
-
-            try await ssoHelper.getDynamicCode(mobile: username, captcha: captcha)
-
-            print("Please enter the dynamic code sent to your mobile:")
-            guard let dynamicCode = readLine(), !dynamicCode.isEmpty else {
-                print("Dynamic code cannot be empty.")
-                return
-            }
-
-            try await ssoHelper.dynamicLogin(
-                username: username, dynamicCode: dynamicCode, captcha: captcha)
+            try await ssoHelper.login(username: username, password: password)
 
             debugPrint(try await ssoHelper.getLoginUser())
+
+            let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
+            debugPrint(try await moocHelper.getProfile())
+
+            let eduHelper = EduHelper(session: try await ssoHelper.loginToEducation())
+            debugPrint(try await eduHelper.profileService.getProfile())
 
             try await ssoHelper.logout()
         } catch {
