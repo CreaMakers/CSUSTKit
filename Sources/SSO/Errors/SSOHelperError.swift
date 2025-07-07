@@ -3,4 +3,6 @@ enum SSOHelperError: Error {
     case loginFailed(String)
     case loginUserRetrievalFailed(String)
     case loginToEducationFailed(String)
+    case captchaRetrievalFailed(String)
+    case dynamicCodeRetrievalFailed(String)
 }
