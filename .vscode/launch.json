@@ -5,18 +5,18 @@
       "request": "launch",
       "args": [],
       "cwd": "${workspaceFolder:csust-api-swift}",
-      "name": "Debug csust-api-swift",
-      "program": "${workspaceFolder:csust-api-swift}/.build/debug/csust-api-swift",
-      "preLaunchTask": "swift: Build Debug csust-api-swift"
+      "name": "Debug CSUSTKitExample",
+      "program": "${workspaceFolder:csust-api-swift}/.build/debug/CSUSTKitExample",
+      "preLaunchTask": "swift: Build Debug CSUSTKitExample"
     },
     {
       "type": "swift",
       "request": "launch",
       "args": [],
       "cwd": "${workspaceFolder:csust-api-swift}",
-      "name": "Release csust-api-swift",
-      "program": "${workspaceFolder:csust-api-swift}/.build/release/csust-api-swift",
-      "preLaunchTask": "swift: Build Release csust-api-swift"
+      "name": "Release CSUSTKitExample",
+      "program": "${workspaceFolder:csust-api-swift}/.build/release/CSUSTKitExample",
+      "preLaunchTask": "swift: Build Release CSUSTKitExample"
     }
   ]
 }

@@ -3,9 +3,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "csust-api-swift",
+    name: "CSUSTKit",
     platforms: [
-        .macOS(.v10_15)
+        .macOS(.v10_15),
+        .iOS(.v13),
+    ],
+    products: [
+        .library(name: "CSUSTKit", targets: ["CSUSTKit"])
     ],
     dependencies: [
         .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.10.2")),
@@ -13,13 +17,21 @@ let package = Package(
         .package(url: "https://github.com/juri/dotenvy.git", from: "0.3.0"),
     ],
     targets: [
-        .executableTarget(
-            name: "csust-api-swift",
+        .target(
+            name: "CSUSTKit",
             dependencies: [
                 .product(name: "Alamofire", package: "alamofire"),
                 .product(name: "SwiftSoup", package: "swiftsoup"),
+            ],
+            path: "Sources"
+        ),
+        .executableTarget(
+            name: "CSUSTKitExample",
+            dependencies: [
+                "CSUSTKit",
                 .product(name: "DotEnvy", package: "dotenvy"),
             ],
-        )
+            path: "Examples"
+        ),
     ]
 )
