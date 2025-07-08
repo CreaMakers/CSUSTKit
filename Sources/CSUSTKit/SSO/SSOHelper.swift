@@ -104,6 +104,7 @@ public class SSOHelper {
 
         guard
             finalURL == URL(string: "https://ehall.csust.edu.cn/index.html")
+                || finalURL == URL(string: "https://ehall.csust.edu.cn/default/index.html")
         else {
             throw SSOHelperError.loginFailed("Login failed, unexpected redirect URL: \(finalURL)")
         }
