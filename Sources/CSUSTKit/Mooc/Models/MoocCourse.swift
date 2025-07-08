@@ -1,6 +1,6 @@
 public struct MoocCourse: Sendable {
-    let id: String
-    let name: String
-    let department: String
-    let teacher: String
+    public let id: String
+    public let name: String
+    public let department: String
+    public let teacher: String
 }

@@ -1,6 +1,6 @@
 public struct MoocProfile: Sendable {
-    let name: String
-    let lastLoginTime: String
-    let totalOnlineTime: String
-    let loginCount: Int
+    public let name: String
+    public let lastLoginTime: String
+    public let totalOnlineTime: String
+    public let loginCount: Int
 }

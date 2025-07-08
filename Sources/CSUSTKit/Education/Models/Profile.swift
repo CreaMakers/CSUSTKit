@@ -1,37 +1,37 @@
 /// 学生档案信息
 public struct Profile: Sendable {
     /// 院系
-    let department: String
+    public let department: String
     /// 专业
-    let major: String
+    public let major: String
     /// 学制
-    let educationSystem: String
+    public let educationSystem: String
     /// 班级
-    let className: String
+    public let className: String
     /// 学号
-    let studentID: String
+    public let studentID: String
     /// 姓名
-    let name: String
+    public let name: String
     /// 性别
-    let gender: String
+    public let gender: String
     /// 姓名拼音
-    let namePinyin: String
+    public let namePinyin: String
     /// 出生日期
-    let birthDate: String
+    public let birthDate: String
     /// 民族
-    let ethnicity: String
+    public let ethnicity: String
     /// 学习层次
-    let studyLevel: String
+    public let studyLevel: String
     /// 家庭现住址
-    let homeAddress: String
+    public let homeAddress: String
     /// 家庭电话
-    let homePhone: String
+    public let homePhone: String
     /// 本人电话
-    let personalPhone: String
+    public let personalPhone: String
     /// 入学日期
-    let enrollmentDate: String
+    public let enrollmentDate: String
     /// 入学考号
-    let entranceExamID: String
+    public let entranceExamID: String
     /// 身份证编号
-    let idCardNumber: String
+    public let idCardNumber: String
 }

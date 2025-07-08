@@ -1,5 +1,5 @@
 public struct Building {
-    let name: String
-    let id: String
-    let campus: Campus
+    public let name: String
+    public let id: String
+    public let campus: Campus
 }

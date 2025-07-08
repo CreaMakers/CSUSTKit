@@ -1,23 +1,23 @@
 /// 考试信息
 public struct Exam: Sendable {
     /// 校区
-    let campus: String
+    public let campus: String
     /// 考试场次
-    let session: String
+    public let session: String
     /// 课程编号
-    let courseID: String
+    public let courseID: String
     /// 课程名称
-    let courseName: String
+    public let courseName: String
     /// 授课教师
-    let teacher: String
+    public let teacher: String
     /// 考试时间
-    let examTime: String
+    public let examTime: String
     /// 考场
-    let examRoom: String
+    public let examRoom: String
     /// 座位号
-    let seatNumber: String
+    public let seatNumber: String
     /// 准考证号
-    let admissionTicketNumber: String
+    public let admissionTicketNumber: String
     /// 备注
-    let remarks: String
+    public let remarks: String
 }

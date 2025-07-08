@@ -1,11 +1,11 @@
 /// 上课时间
-struct ScheduleSession: Hashable {
+public struct ScheduleSession: Hashable, Sendable {
     /// 课程周次
-    let weeks: [Int]
+    public let weeks: [Int]
     /// 课程节次
-    let sections: [Int]
+    public let sections: [Int]
     //// 每周日期
-    let dayOfWeek: DayOfWeek
+    public let dayOfWeek: DayOfWeek
     /// 上课教室
-    let classroom: String?
+    public let classroom: String?
 }
