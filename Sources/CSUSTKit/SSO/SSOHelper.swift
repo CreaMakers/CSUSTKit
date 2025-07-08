@@ -5,8 +5,12 @@ import SwiftSoup
 
 public class SSOHelper {
     var session: Session = Session()
+    private let cookieStorage: CookieStorage?
 
-    public init() {}
+    public init(cookieStorage: CookieStorage? = nil) {
+        self.cookieStorage = cookieStorage
+        cookieStorage?.restoreCookies(to: session)
+    }
 
     private func checkNeedCaptcha(username: String) async throws -> Bool {
         struct CheckResponse: Decodable {
