@@ -6,4 +6,5 @@ public struct LoginUser: Codable, Sendable {
     public let phone: String
     public let email: String?
     public let deptName: String
+    public let defaultUserAvatar: String
 }
