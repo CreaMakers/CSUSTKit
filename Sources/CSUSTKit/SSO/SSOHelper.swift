@@ -4,12 +4,24 @@ import Foundation
 import SwiftSoup
 
 public class SSOHelper {
-    var session: Session = Session()
+    private var session: Session = Session()
     private let cookieStorage: CookieStorage?
 
     public init(cookieStorage: CookieStorage? = nil) {
         self.cookieStorage = cookieStorage
+        restoreCookies()
+    }
+
+    public func saveCookies() {
+        cookieStorage?.saveCookies(for: session)
+    }
+
+    public func restoreCookies() {
         cookieStorage?.restoreCookies(to: session)
+    }
+
+    public func clearCookies() {
+        cookieStorage?.clearCookies()
     }
 
     private func checkNeedCaptcha(username: String) async throws -> Bool {
