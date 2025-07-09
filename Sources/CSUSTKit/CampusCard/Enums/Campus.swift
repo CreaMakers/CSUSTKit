@@ -1,4 +1,4 @@
-public enum Campus: String {
+public enum Campus: String, Sendable {
     case yuntang = "云塘"
     case jinpenling = "金盆岭"
 
