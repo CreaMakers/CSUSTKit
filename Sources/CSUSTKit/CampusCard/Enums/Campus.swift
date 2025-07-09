@@ -2,7 +2,7 @@ public enum Campus: String, Sendable {
     case yuntang = "云塘"
     case jinpenling = "金盆岭"
 
-    var id: String {
+    public var id: String {
         switch self {
         case .yuntang:
             return "0030000000002501"
@@ -11,7 +11,7 @@ public enum Campus: String, Sendable {
         }
     }
 
-    var displayName: String {
+    public var displayName: String {
         return "\(self.rawValue)校区"
     }
 }
