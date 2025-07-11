@@ -13,6 +13,7 @@ enum EduHelperError: Error, LocalizedError {
     case availableSemestersForCourseScheduleRetrievalFailed(String)
     case semesterStartDateRetrievalFailed(String)
     case availableSemestersForStartDateRetrievalFailed(String)
+    case dateParsingFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -40,6 +41,8 @@ enum EduHelperError: Error, LocalizedError {
             return "Semester start date retrieval failed: \(message)"
         case .availableSemestersForStartDateRetrievalFailed(let message):
             return "Available semesters for start date retrieval failed: \(message)"
+        case .dateParsingFailed(let message):
+            return "Date parsing failed: \(message)"
         }
     }
 }

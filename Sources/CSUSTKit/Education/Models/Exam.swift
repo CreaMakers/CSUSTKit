@@ -1,3 +1,5 @@
+import Foundation
+
 /// 考试信息
 public struct Exam: Sendable {
     /// 校区
@@ -12,6 +14,8 @@ public struct Exam: Sendable {
     public let teacher: String
     /// 考试时间
     public let examTime: String
+    /// 考试时间段的开始和结束时间
+    public let examTimeRange: (start: Date, end: Date)
     /// 考场
     public let examRoom: String
     /// 座位号

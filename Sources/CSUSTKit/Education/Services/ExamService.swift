@@ -1,4 +1,5 @@
 import Alamofire
+import Foundation
 import SwiftSoup
 
 public class ExamService: BaseService {
@@ -9,7 +10,9 @@ public class ExamService: BaseService {
      *   - semesterType: 学期类型，如果为 `nil` 则查询所有类型的考试
      * - Returns: 考试信息数组
      */
-    public func getExamSchedule(academicYearSemester: String? = nil, semesterType: SemesterType? = nil)
+    public func getExamSchedule(
+        academicYearSemester: String? = nil, semesterType: SemesterType? = nil
+    )
         async throws
         -> [Exam]
     {
@@ -55,6 +58,7 @@ public class ExamService: BaseService {
                 courseName: try cols[4].text().trim(),
                 teacher: try cols[5].text().trim(),
                 examTime: try cols[6].text().trim(),
+                examTimeRange: try parseDate(from: try cols[6].text().trim()),
                 examRoom: try cols[7].text().trim(),
                 seatNumber: try cols[8].text().trim(),
                 admissionTicketNumber: try cols[9].text().trim(),
@@ -102,5 +106,35 @@ public class ExamService: BaseService {
         }
 
         return (semesters, defaultSemester)
+    }
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.timeZone = TimeZone(identifier: "Asia/Shanghai")
+        return formatter
+    }()
+
+    private func parseDate(from dateString: String) throws -> (Date, Date) {
+        let components = dateString.split(separator: " ")
+        guard components.count == 2 else {
+            throw EduHelperError.dateParsingFailed("Invalid date string format: \(dateString)")
+        }
+        let timeComponents = components[1].split(separator: "~")
+
+        guard timeComponents.count == 2 else {
+            throw EduHelperError.dateParsingFailed(
+                "Invalid time format in date string: \(dateString)")
+        }
+
+        guard
+            let startDate = Self.dateFormatter.date(from: "\(components[0]) \(timeComponents[0])"),
+            let endDate = Self.dateFormatter.date(from: "\(components[0]) \(timeComponents[1])")
+        else {
+            throw EduHelperError.dateParsingFailed(
+                "Failed to parse date from string: \(dateString)")
+        }
+        return (startDate, endDate)
     }
 }
