@@ -1,5 +1,5 @@
 /// 每周的日期。周日为0，周六为6
-public enum DayOfWeek: Int, Sendable {
+public enum DayOfWeek: Int, Sendable, CaseIterable {
     case sunday = 0
     case monday
     case tuesday

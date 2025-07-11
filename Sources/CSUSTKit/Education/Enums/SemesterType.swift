@@ -1,5 +1,5 @@
 /// 学期类型枚举
-public enum SemesterType: String {
+public enum SemesterType: String, CaseIterable {
     /// 期初
     case beginning = "期初"
     /// 期中

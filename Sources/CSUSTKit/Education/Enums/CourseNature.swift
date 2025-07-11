@@ -1,5 +1,5 @@
 /// 课程性质枚举
-public enum CourseNature: String, Sendable {
+public enum CourseNature: String, Sendable, CaseIterable {
     case other = "其他"
     case publicCourse = "公共课"
     case publicBasicCourse = "公共基础课"

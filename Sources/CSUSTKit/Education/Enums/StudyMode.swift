@@ -1,5 +1,5 @@
 /// 修读方式枚举
-public enum StudyMode: String {
+public enum StudyMode: String, CaseIterable {
     case major = "主修"
     case minor = "辅修"
     case all = "全部"
