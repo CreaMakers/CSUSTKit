@@ -124,7 +124,7 @@ public class CourseService: BaseService {
      * - Returns: 包含所有可用学期的数组
      */
     public func getAvailableSemestersForCourseGrades() async throws -> [String] {
-        let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_list")
+        let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_query")
 
         let document = try SwiftSoup.parse(response)
         guard let semesterSelect = try document.select("#kksj").first() else {
