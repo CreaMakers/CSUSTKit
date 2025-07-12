@@ -1,5 +1,5 @@
 /// 成绩组成
-public struct GradeComponent {
+public struct GradeComponent: Sendable {
     /// 成绩类型
     public let type: String
     /// 成绩
@@ -9,7 +9,7 @@ public struct GradeComponent {
 }
 
 /// 成绩详情
-public struct GradeDetail {
+public struct GradeDetail: Sendable {
     /// 成绩组成
     public let components: [GradeComponent]
     /// 总成绩
