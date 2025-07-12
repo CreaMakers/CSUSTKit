@@ -173,7 +173,14 @@ public class CourseService: BaseService {
         for i in stride(from: 1, to: headerCols.count - 1, by: 2) {
             let type = try headerCols[i].text().trim()
             let grade = try valueCols[i].text().trim()
-            let ratio = try valueCols[i + 1].text().trim()
+            let ratioString = try valueCols[i + 1].text().trim().replacingOccurrences(
+                of: "%", with: "")
+
+            guard let ratio = Int(ratioString) else {
+                throw EduHelperError.gradeDetailRetrievalFailed(
+                    "Invalid ratio format: \(ratioString)")
+            }
+
             guard let gradeValue = Double(grade) else {
                 throw EduHelperError.gradeDetailRetrievalFailed("Invalid grade format: \(grade)")
             }

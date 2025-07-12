@@ -5,7 +5,7 @@ public struct GradeComponent: Sendable {
     /// 成绩
     public let grade: Double
     /// 成绩比例
-    public let ratio: String
+    public let ratio: Int
 }
 
 /// 成绩详情
