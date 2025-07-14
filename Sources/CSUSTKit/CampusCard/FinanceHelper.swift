@@ -151,8 +151,6 @@ public class CampusCardHelper {
             throw CampusCardHelperError.electricityRetrievalFailed("No error message found")
         }
 
-        debugPrint(errmsg)
-
         let pattern = #"(\d+(\.\d+)?)"#
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []),
             let match = regex.firstMatch(
