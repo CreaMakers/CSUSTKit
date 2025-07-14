@@ -151,13 +151,22 @@ public class CampusCardHelper {
             throw CampusCardHelperError.electricityRetrievalFailed("No error message found")
         }
 
-        guard errmsg.contains("房间当前剩余电量") else {
+        debugPrint(errmsg)
+
+        let pattern = #"(\d+(\.\d+)?)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []),
+            let match = regex.firstMatch(
+                in: errmsg, options: [], range: NSRange(location: 0, length: errmsg.utf16.count)),
+            let range = Range(match.range(at: 1), in: errmsg)
+        else {
             throw CampusCardHelperError.electricityRetrievalFailed(
-                "Unexpected error message: \(errmsg)"
+                "Failed to find electricity value in message: \(errmsg)"
             )
         }
 
-        guard let electricity = Double(errmsg.replacingOccurrences(of: "房间当前剩余电量", with: "")) else {
+        let electricityString = String(errmsg[range])
+
+        guard let electricity = Double(electricityString) else {
             throw CampusCardHelperError.electricityRetrievalFailed(
                 "Failed to parse electricity value from message: \(errmsg)"
             )
