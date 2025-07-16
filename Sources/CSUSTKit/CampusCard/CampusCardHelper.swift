@@ -1,7 +1,7 @@
 import Alamofire
 import Foundation
 
-public class CampusCardHelper {
+public actor CampusCardHelper {
     let session: Session = Session()
 
     public init() {}
