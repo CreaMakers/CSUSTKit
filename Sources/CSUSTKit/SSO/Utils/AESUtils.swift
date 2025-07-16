@@ -1,4 +1,4 @@
-import CommonCrypto
+import CryptoSwift
 import Foundation
 
 struct AESUtils {
@@ -8,27 +8,17 @@ struct AESUtils {
     }
 
     static func aesEncrypt(data: String, key: String, iv: String) -> String? {
-        guard let keyData = key.data(using: .utf8),
-            let ivData = iv.data(using: .utf8),
-            let dataToEncrypt = data.data(using: .utf8)
-        else {
-            return nil
-        }
+        do {
+            let keyBytes = Array(key.utf8.prefix(16))
+            let ivBytes = Array(iv.utf8.prefix(16))
+            let plaintext = Array(data.utf8)
 
-        let keyBytes = Array(keyData.prefix(16))
-        let ivBytes = Array(ivData.prefix(16))
-        var encryptedBytes = [UInt8](repeating: 0, count: dataToEncrypt.count + kCCBlockSizeAES128)
-        var encryptedLength = 0
+            let aes = try AES(key: keyBytes, blockMode: CBC(iv: ivBytes), padding: .pkcs7)
+            let encrypted = try aes.encrypt(plaintext)
 
-        let status = CCCrypt(
-            CCOperation(kCCEncrypt), CCAlgorithm(kCCAlgorithmAES), CCOptions(kCCOptionPKCS7Padding),
-            keyBytes, kCCKeySizeAES128, ivBytes, Array(dataToEncrypt), dataToEncrypt.count,
-            &encryptedBytes, encryptedBytes.count, &encryptedLength)
-
-        if status == kCCSuccess {
-            let encryptedData = Data(bytes: encryptedBytes, count: encryptedLength)
-            return encryptedData.base64EncodedString()
-        } else {
+            return Data(encrypted).base64EncodedString()
+        } catch {
+            print("Encryption error: \(error)")
             return nil
         }
     }
