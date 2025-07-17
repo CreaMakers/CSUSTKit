@@ -276,7 +276,8 @@ public class CourseService: BaseService {
         let groupName: String?
         let teacherName: String
         let weeks: [Int]
-        let sections: [Int]
+        let startSection: Int
+        let endSection: Int
         let classroom: String?
     }
 
@@ -326,13 +327,20 @@ public class CourseService: BaseService {
                 throw EduHelperError.courseScheduleRetrievalFailed("Invalid weeks or sections")
             }
 
+            guard let startSession = sections.first,
+                let endSession = sections.last
+            else {
+                throw EduHelperError.courseScheduleRetrievalFailed("Invalid section range")
+            }
+
             courseSchedules.append(
                 ParsedItem(
                     courseName: courseName,
                     groupName: groupName,
                     teacherName: teacherName,
                     weeks: weeks,
-                    sections: sections,
+                    startSection: startSession,
+                    endSection: endSession,
                     classroom: classroom
                 )
             )
@@ -372,7 +380,8 @@ public class CourseService: BaseService {
                 let parsedItems = try parseCourse(element: col)
                 for item in parsedItems {
                     let newSession = ScheduleSession(
-                        weeks: item.weeks, sections: item.sections, dayOfWeek: day,
+                        weeks: item.weeks, startSection: item.startSection,
+                        endSection: item.endSection, dayOfWeek: day,
                         classroom: item.classroom)
 
                     if var existingCourse = courseDictionary[item.courseName] {
