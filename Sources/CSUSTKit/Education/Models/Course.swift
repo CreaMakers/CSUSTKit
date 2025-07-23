@@ -1,5 +1,5 @@
 /// 课表信息
-public struct Course: Sendable {
+public struct Course: Sendable, Codable {
     /// 课程名称
     public let courseName: String
     /// 课程分组名称

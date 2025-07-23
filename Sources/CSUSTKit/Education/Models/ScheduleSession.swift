@@ -1,5 +1,5 @@
 /// 上课时间
-public struct ScheduleSession: Hashable, Sendable {
+public struct ScheduleSession: Hashable, Sendable, Codable {
     /// 课程周次
     public let weeks: [Int]
     /// 课程开始节次
