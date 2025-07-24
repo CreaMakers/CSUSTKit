@@ -10,4 +10,14 @@ public struct ScheduleSession: Hashable, Sendable, Codable {
     public let dayOfWeek: DayOfWeek
     /// 上课教室
     public let classroom: String?
+
+    public init(
+        weeks: [Int], startSection: Int, endSection: Int, dayOfWeek: DayOfWeek, classroom: String?
+    ) {
+        self.weeks = weeks
+        self.startSection = startSection
+        self.endSection = endSection
+        self.dayOfWeek = dayOfWeek
+        self.classroom = classroom
+    }
 }

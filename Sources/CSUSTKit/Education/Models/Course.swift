@@ -8,4 +8,13 @@ public struct Course: Sendable, Codable {
     public let teacher: String
     /// 上课时间
     public var sessions: [ScheduleSession]
+
+    public init(
+        courseName: String, groupName: String?, teacher: String, sessions: [ScheduleSession]
+    ) {
+        self.courseName = courseName
+        self.groupName = groupName
+        self.teacher = teacher
+        self.sessions = sessions
+    }
 }
