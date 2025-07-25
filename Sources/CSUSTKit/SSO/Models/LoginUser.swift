@@ -7,4 +7,13 @@ public struct LoginUser: Codable, Sendable {
     public let email: String?
     public let deptName: String
     public let defaultUserAvatar: String
+    public let headImageIcon: String?
+
+    public var avatar: String {
+        if let headImageIcon = headImageIcon {
+            return headImageIcon
+        } else {
+            return defaultUserAvatar
+        }
+    }
 }
