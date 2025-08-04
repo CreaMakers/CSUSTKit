@@ -8,7 +8,7 @@ public class MoocHelper {
         self.session = session
     }
 
-    public func getProfile() async throws -> MoocProfile {
+    public func getProfile() async throws -> Profile {
         let response = try await session.request("http://pt.csust.edu.cn/meol/personal.do")
             .serializingString(encoding: .gbk).value
 
@@ -29,7 +29,7 @@ public class MoocHelper {
             throw MoocHelperError.profileRetrievalFailed("Invalid login count format")
         }
 
-        return MoocProfile(
+        return Profile(
             name: name,
             lastLoginTime: lastLoginTime,
             totalOnlineTime: totalOnlineTime,
@@ -37,7 +37,7 @@ public class MoocHelper {
         )
     }
 
-    public func getCourses() async throws -> [MoocCourse] {
+    public func getCourses() async throws -> [Course] {
         let response = try await session.request(
             "http://pt.csust.edu.cn/meol/lesson/blen.student.lesson.list.jsp"
         ).serializingString(encoding: .gbk).value
@@ -53,7 +53,7 @@ public class MoocHelper {
             throw MoocHelperError.courseRetrievalFailed("No courses found")
         }
 
-        var courses: [MoocCourse] = []
+        var courses: [Course] = []
 
         for (index, row) in rows.enumerated() {
             guard index > 0 else { continue }
@@ -68,7 +68,7 @@ public class MoocHelper {
             let department = try cols[2].text()
             let teacher = try cols[3].text()
 
-            let course = MoocCourse(
+            let course = Course(
                 id: id,
                 name: name,
                 department: department,
