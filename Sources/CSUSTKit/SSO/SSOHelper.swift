@@ -3,6 +3,11 @@ import Foundation
 import SwiftSoup
 
 public class SSOHelper {
+    struct LoginForm {
+        let pwdEncryptSalt: String
+        let execution: String
+    }
+
     private var session: Session = Session()
     private let cookieStorage: CookieStorage?
 
@@ -125,9 +130,9 @@ public class SSOHelper {
         }
     }
 
-    public func getLoginUser() async throws -> LoginUser {
+    public func getLoginUser() async throws -> Profile {
         struct LoginUserResponse: Decodable, Sendable {
-            let data: LoginUser?
+            let data: Profile?
         }
 
         let response = try await session.request("https://ehall.csust.edu.cn/getLoginUser")
