@@ -1,17 +1,19 @@
-/// 修读方式枚举
-public enum StudyMode: String, CaseIterable {
-    case major = "主修"
-    case minor = "辅修"
-    case all = "全部"
+extension EduHelper {
+    /// 修读方式枚举
+    public enum StudyMode: String, CaseIterable {
+        case major = "主修"
+        case minor = "辅修"
+        case all = "全部"
 
-    var id: String {
-        switch self {
-        case .major:
-            return "0"
-        case .minor:
-            return "1"
-        case .all:
-            return "2"
+        var id: String {
+            switch self {
+            case .major:
+                return "0"
+            case .minor:
+                return "1"
+            case .all:
+                return "2"
+            }
         }
     }
 }

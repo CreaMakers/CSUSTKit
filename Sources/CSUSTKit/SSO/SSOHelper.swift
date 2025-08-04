@@ -149,12 +149,13 @@ public class SSOHelper {
 
     public func loginToEducation() async throws -> Session {
         _ = try await session.request(
-            "http://xk.csust.edu.cn/sso.jsp", interceptor: EduRequestInterceptor(maxRetryCount: 5)
+            "http://xk.csust.edu.cn/sso.jsp",
+            interceptor: EduHelper.EduRequestInterceptor(maxRetryCount: 5)
         )
         .serializingString().value
         let response = try await session.request(
             "https://authserver.csust.edu.cn/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp",
-            interceptor: EduRequestInterceptor(maxRetryCount: 5)
+            interceptor: EduHelper.EduRequestInterceptor(maxRetryCount: 5)
         ).serializingString().value
 
         guard !response.contains("请输入账号") else {
