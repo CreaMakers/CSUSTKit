@@ -9,5 +9,12 @@ extension MoocHelper {
         public let totalOnlineTime: String
         /// 登录次数
         public let loginCount: Int
+
+        public init(name: String, lastLoginTime: String, totalOnlineTime: String, loginCount: Int) {
+            self.name = name
+            self.lastLoginTime = lastLoginTime
+            self.totalOnlineTime = totalOnlineTime
+            self.loginCount = loginCount
+        }
     }
 }

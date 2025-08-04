@@ -28,5 +28,27 @@ extension SSOHelper {
                 return defaultUserAvatar
             }
         }
+
+        public init(
+            categoryName: String,
+            userAccount: String,
+            userName: String,
+            certCode: String,
+            phone: String,
+            email: String?,
+            deptName: String,
+            defaultUserAvatar: String,
+            headImageIcon: String?
+        ) {
+            self.categoryName = categoryName
+            self.userAccount = userAccount
+            self.userName = userName
+            self.certCode = certCode
+            self.phone = phone
+            self.email = email
+            self.deptName = deptName
+            self.defaultUserAvatar = defaultUserAvatar
+            self.headImageIcon = headImageIcon
+        }
     }
 }
