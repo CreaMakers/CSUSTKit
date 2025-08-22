@@ -4,6 +4,7 @@ extension MoocHelper {
     enum MoocHelperError: Error, LocalizedError {
         case profileRetrievalFailed(String)
         case courseRetrievalFailed(String)
+        case testRetrievalFailed(String)
 
         var errorDescription: String? {
             switch self {
@@ -11,6 +12,8 @@ extension MoocHelper {
                 return "Profile retrieval failed: \(message)"
             case .courseRetrievalFailed(let message):
                 return "Course retrieval failed: \(message)"
+            case .testRetrievalFailed(let message):
+                return "Test retrieval failed: \(message)"
             }
         }
     }

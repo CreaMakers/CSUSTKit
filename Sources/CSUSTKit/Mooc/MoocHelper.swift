@@ -50,7 +50,7 @@ public class MoocHelper {
         let rows = try tableElement.select("tr")
 
         guard rows.count >= 1 else {
-            throw MoocHelperError.courseRetrievalFailed("No courses found")
+            throw MoocHelperError.courseRetrievalFailed("Invalid course table format")
         }
 
         var courses: [Course] = []
@@ -118,6 +118,54 @@ public class MoocHelper {
                 startTime: $0.startDateTime
             )
         }
+    }
+
+    public func getCourseTests(courseId: String) async throws -> [Test] {
+        let response = try await session.request("http://pt.csust.edu.cn/meol/common/question/test/student/list.jsp?sortColumn=createTime&sortDirection=-1&cateId=\(courseId)&pagingPage=1&status=1&pagingNumberPer=1000").serializingString(encoding: .gbk).value
+        let document = try SwiftSoup.parse(response)
+
+        guard let tableElement = try document.getElementsByClass("valuelist").first() else {
+            throw MoocHelperError.testRetrievalFailed("Test table not found")
+        }
+
+        let rows = try tableElement.getElementsByTag("tr")
+
+        guard rows.count >= 1 else {
+            throw MoocHelperError.testRetrievalFailed("Invalid test table format")
+        }
+
+        var tests: [Test] = []
+
+        for (index, row) in rows.enumerated() {
+            guard index > 0 else { continue }
+            let cols = try row.getElementsByTag("td")
+
+            guard cols.count >= 8 else {
+                throw MoocHelperError.testRetrievalFailed("Unexpected test row format")
+            }
+
+            let title = try cols[0].text()
+            let startTime = try cols[1].text()
+            let endTime = try cols[2].text()
+            let rawAllowRetake = try cols[3].text()
+            let allowRetake = rawAllowRetake == "不限制" ? nil : Int(rawAllowRetake)
+            guard let timeLimit = Int(try cols[4].text()) else {
+                throw MoocHelperError.testRetrievalFailed("Invalid time limit format")
+            }
+            let isSubmitted = try cols[7].html().contains("查看结果")
+            tests.append(
+                Test(
+                    title: title,
+                    startTime: startTime,
+                    endTime: endTime,
+                    allowRetake: allowRetake,
+                    timeLimit: timeLimit,
+                    isSubmitted: isSubmitted
+                )
+            )
+        }
+
+        return tests
     }
 
     public func logout() async throws {
