@@ -22,11 +22,12 @@ struct Main {
 
             debugPrint(try await ssoHelper.getLoginUser())
 
-            // let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
+            let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
             let eduHelper = EduHelper(session: try await ssoHelper.loginToEducation())
 
-            // debugPrint(try await moocHelper.getProfile())
-            // debugPrint(try await moocHelper.getCourses())
+            debugPrint(try await moocHelper.getProfile())
+            debugPrint(try await moocHelper.getCourses())
+            debugPrint(try await moocHelper.geteCourseHomeworks(courseId: "69571"))
 
             debugPrint(try await eduHelper.profileService.getProfile())
             debugPrint(try await eduHelper.examService.getExamSchedule())

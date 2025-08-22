@@ -3,6 +3,8 @@ extension MoocHelper {
     public struct Course: Sendable, Hashable {
         /// 课程ID
         public let id: String
+        /// 课程编号
+        public let number: String
         /// 课程名称
         public let name: String
         /// 所属院系
@@ -12,11 +14,13 @@ extension MoocHelper {
 
         public init(
             id: String,
+            number: String,
             name: String,
             department: String,
             teacher: String
         ) {
             self.id = id
+            self.number = number
             self.name = name
             self.department = department
             self.teacher = teacher

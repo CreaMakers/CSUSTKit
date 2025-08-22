@@ -63,13 +63,20 @@ public class MoocHelper {
                 throw MoocHelperError.courseRetrievalFailed("Unexpected course row format")
             }
 
-            let id = try cols[0].text()
+            let number = try cols[0].text()
             let name = try cols[1].text()
+            guard let a = try cols[1].getElementsByTag("a").first() else {
+                throw MoocHelperError.courseRetrievalFailed("Course id not found")
+            }
+            let id = (try a.attr("onclick"))
+                .replacingOccurrences(of: "window.open('../homepage/course/course_index.jsp?courseId=", with: "")
+                .replacingOccurrences(of: "','manage_course')", with: "")
             let department = try cols[2].text()
             let teacher = try cols[3].text()
 
             let course = Course(
                 id: id,
+                number: number,
                 name: name,
                 department: department,
                 teacher: teacher
@@ -78,6 +85,39 @@ public class MoocHelper {
         }
 
         return courses
+    }
+
+    public func geteCourseHomeworks(courseId: String) async throws -> [Homework] {
+        struct Response: Codable {
+            struct Datas: Codable {
+                let hwtList: [Homework]
+                struct Homework: Codable {
+                    let realName: String
+                    let startDateTime: String
+                    let mutualTask: String
+                    let submitStruts: Bool
+                    let id: Int
+                    let title: String
+                    let deadLine: String
+                    let answerStatus: Bool?
+                }
+            }
+            let datas: Datas
+        }
+
+        let response = try await session.request("http://pt.csust.edu.cn/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(courseId)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline").serializingDecodable(Response.self).value
+
+        return response.datas.hwtList.map {
+            Homework(
+                id: $0.id,
+                title: $0.title,
+                publisher: $0.realName,
+                canSubmit: $0.submitStruts,
+                submitStatus: $0.answerStatus != nil,
+                deadline: $0.deadLine,
+                startTime: $0.startDateTime
+            )
+        }
     }
 
     public func logout() async throws {
