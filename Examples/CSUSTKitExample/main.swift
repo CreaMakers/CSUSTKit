@@ -27,7 +27,7 @@ struct Main {
 
             debugPrint(try await moocHelper.getProfile())
             debugPrint(try await moocHelper.getCourses())
-            debugPrint(try await moocHelper.geteCourseHomeworks(courseId: "69571"))
+            debugPrint(try await moocHelper.getCourseHomeworks(courseId: "69571"))
 
             debugPrint(try await eduHelper.profileService.getProfile())
             debugPrint(try await eduHelper.examService.getExamSchedule())

@@ -87,7 +87,7 @@ public class MoocHelper {
         return courses
     }
 
-    public func geteCourseHomeworks(courseId: String) async throws -> [Homework] {
+    public func getCourseHomeworks(courseId: String) async throws -> [Homework] {
         struct Response: Codable {
             struct Datas: Codable {
                 let hwtList: [Homework]
