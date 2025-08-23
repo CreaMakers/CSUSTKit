@@ -90,7 +90,7 @@ public class MoocHelper {
     public func getCourseHomeworks(courseId: String) async throws -> [Homework] {
         struct Response: Codable {
             struct Datas: Codable {
-                let hwtList: [Homework]
+                let hwtList: [Homework]?
                 struct Homework: Codable {
                     let realName: String
                     let startDateTime: String
@@ -107,7 +107,7 @@ public class MoocHelper {
 
         let response = try await session.request("http://pt.csust.edu.cn/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(courseId)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline").serializingDecodable(Response.self).value
 
-        return response.datas.hwtList.map {
+        return response.datas.hwtList?.map {
             Homework(
                 id: $0.id,
                 title: $0.title,
@@ -117,7 +117,7 @@ public class MoocHelper {
                 deadline: $0.deadLine,
                 startTime: $0.startDateTime
             )
-        }
+        } ?? []
     }
 
     public func getCourseTests(courseId: String) async throws -> [Test] {
