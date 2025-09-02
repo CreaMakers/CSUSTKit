@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 课程成绩信息
-    public struct CourseGrade: Sendable {
+    public struct CourseGrade: Sendable, Codable {
         /// 开课学期
         public let semester: String
         /// 课程编号
@@ -76,7 +76,7 @@ extension EduHelper {
     }
 
     /// 成绩组成
-    public struct GradeComponent: Sendable {
+    public struct GradeComponent: Sendable, Codable {
         /// 成绩类型
         public let type: String
         /// 成绩
@@ -92,7 +92,7 @@ extension EduHelper {
     }
 
     /// 成绩详情
-    public struct GradeDetail: Sendable {
+    public struct GradeDetail: Sendable, Codable {
         /// 成绩组成
         public let components: [GradeComponent]
         /// 总成绩

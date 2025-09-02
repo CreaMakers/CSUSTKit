@@ -2,7 +2,7 @@ import Foundation
 
 extension EduHelper {
     /// 考试信息
-    public struct Exam: Sendable {
+    public struct Exam: Sendable, Codable {
         /// 校区
         public let campus: String
         /// 考试场次
@@ -15,8 +15,10 @@ extension EduHelper {
         public let teacher: String
         /// 考试时间
         public let examTime: String
-        /// 考试时间段的开始和结束时间
-        public let examTimeRange: (start: Date, end: Date)
+        /// 考试开始时间
+        public let examStartTime: Date
+        /// 考试结束时间
+        public let examEndTime: Date
         /// 考场
         public let examRoom: String
         /// 座位号
@@ -33,7 +35,8 @@ extension EduHelper {
             courseName: String,
             teacher: String,
             examTime: String,
-            examTimeRange: (start: Date, end: Date),
+            examStartTime: Date,
+            examEndTime: Date,
             examRoom: String,
             seatNumber: String,
             admissionTicketNumber: String,
@@ -45,7 +48,8 @@ extension EduHelper {
             self.courseName = courseName
             self.teacher = teacher
             self.examTime = examTime
-            self.examTimeRange = examTimeRange
+            self.examStartTime = examStartTime
+            self.examEndTime = examEndTime
             self.examRoom = examRoom
             self.seatNumber = seatNumber
             self.admissionTicketNumber = admissionTicketNumber

@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 课程性质枚举
-    public enum CourseNature: String, Sendable, CaseIterable {
+    public enum CourseNature: String, Sendable, CaseIterable, Codable {
         case other = "其他"
         case publicCourse = "公共课"
         case publicBasicCourse = "公共基础课"
