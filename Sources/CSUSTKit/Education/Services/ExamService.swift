@@ -52,6 +52,8 @@ extension EduHelper {
                         "Row does not contain enough columns: \(cols.count)")
                 }
 
+                let examTimeRange = try parseDate(from: try cols[6].text().trim())
+
                 let exam = Exam(
                     campus: try cols[1].text().trim(),
                     session: try cols[2].text().trim(),
@@ -59,7 +61,8 @@ extension EduHelper {
                     courseName: try cols[4].text().trim(),
                     teacher: try cols[5].text().trim(),
                     examTime: try cols[6].text().trim(),
-                    examTimeRange: try parseDate(from: try cols[6].text().trim()),
+                    examStartTime: examTimeRange.0,
+                    examEndTime: examTimeRange.1,
                     examRoom: try cols[7].text().trim(),
                     seatNumber: try cols[8].text().trim(),
                     admissionTicketNumber: try cols[9].text().trim(),
