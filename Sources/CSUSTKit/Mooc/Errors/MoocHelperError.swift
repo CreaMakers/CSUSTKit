@@ -5,6 +5,7 @@ extension MoocHelper {
         case profileRetrievalFailed(String)
         case courseRetrievalFailed(String)
         case testRetrievalFailed(String)
+        case courseNamesWithPendingHomeworksRetrievalFailed(String)
 
         var errorDescription: String? {
             switch self {
@@ -14,6 +15,8 @@ extension MoocHelper {
                 return "Course retrieval failed: \(message)"
             case .testRetrievalFailed(let message):
                 return "Test retrieval failed: \(message)"
+            case .courseNamesWithPendingHomeworksRetrievalFailed(let message):
+                return "Course names with pending homeworks retrieval failed: \(message)"
             }
         }
     }

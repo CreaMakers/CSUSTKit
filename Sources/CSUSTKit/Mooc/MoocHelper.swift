@@ -168,6 +168,33 @@ public class MoocHelper {
         return tests
     }
 
+    public func getCourseNamesWithPendingHomeworks() async throws -> [(name: String, id: String)] {
+        let response = try await session.request("http://pt.csust.edu.cn/meol/welcomepage/student/interaction_reminder_v8.jsp").serializingString(encoding: .gbk).value
+        let document = try SwiftSoup.parse(response)
+
+        guard let reminderElement = try document.getElementById("reminder") else {
+            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("Reminder section not found")
+        }
+
+        guard let courseNamesContainer = try reminderElement.getElementsByTag("li").first() else {
+            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("No reminders found")
+        }
+
+        let courseNameElements = try courseNamesContainer.select("li > ul > li > a")
+
+        var courseNames: [(name: String, id: String)] = []
+
+        for courseNameElement in courseNameElements {
+            let id = (try courseNameElement.attr("onclick"))
+                .replacingOccurrences(of: "window.open('./lesson/enter_course.jsp?lid=", with: "")
+                .replacingOccurrences(of: "&t=hw','manage_course')", with: "")
+            let courseName = try courseNameElement.text().trim()
+            courseNames.append((name: courseName, id: id))
+        }
+
+        return courseNames
+    }
+
     public func logout() async throws {
         _ = try await session.request("http://pt.csust.edu.cn/meol/homepage/V8/include/logout.jsp")
             .serializingString(encoding: .gbk).value
