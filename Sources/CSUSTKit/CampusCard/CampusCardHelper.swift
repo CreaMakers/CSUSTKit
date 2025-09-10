@@ -46,7 +46,7 @@ public actor CampusCardHelper {
         let jsonEncoder = JSONEncoder()
         let jsonData = try jsonEncoder.encode(requestDict)
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-            throw CampusCardHelperError.buildingRetrievalFailed("Failed to encode JSON")
+            throw CampusCardHelperError.buildingRetrievalFailed("JSON编码失败")
         }
 
         let parameters: [String: String] = [
@@ -62,7 +62,7 @@ public actor CampusCardHelper {
 
         guard let buildingTab = responseData.queryElecBuilding.buildingtab else {
             throw CampusCardHelperError.buildingRetrievalFailed(
-                "No buildings found for campus \(campus.displayName)")
+                "未找到校区 \(campus.displayName) 的楼栋信息")
         }
 
         var buildings: [Building] = []
@@ -134,7 +134,7 @@ public actor CampusCardHelper {
         let jsonEncoder = JSONEncoder()
         let jsonData = try jsonEncoder.encode(requestDict)
         guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-            throw CampusCardHelperError.electricityRetrievalFailed("Failed to encode JSON")
+            throw CampusCardHelperError.electricityRetrievalFailed("JSON编码失败")
         }
 
         let parameters: [String: String] = [
@@ -148,7 +148,7 @@ public actor CampusCardHelper {
         ).serializingDecodable(BuildingResponse.self).value
 
         guard let errmsg = responseData.queryElecRoomInfo.errmsg else {
-            throw CampusCardHelperError.electricityRetrievalFailed("No error message found")
+            throw CampusCardHelperError.electricityRetrievalFailed("未找到错误信息")
         }
 
         let pattern = #"(\d+(\.\d+)?)"#
@@ -158,7 +158,7 @@ public actor CampusCardHelper {
             let range = Range(match.range(at: 1), in: errmsg)
         else {
             throw CampusCardHelperError.electricityRetrievalFailed(
-                "Failed to find electricity value in message: \(errmsg)"
+                "未能在信息中找到电费数值: \(errmsg)"
             )
         }
 
@@ -166,7 +166,7 @@ public actor CampusCardHelper {
 
         guard let electricity = Double(electricityString) else {
             throw CampusCardHelperError.electricityRetrievalFailed(
-                "Failed to parse electricity value from message: \(errmsg)"
+                "无法从信息中解析电费数值: \(errmsg)"
             )
         }
 

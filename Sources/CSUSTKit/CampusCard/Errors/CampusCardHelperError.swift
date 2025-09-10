@@ -9,11 +9,11 @@ extension CampusCardHelper {
         var errorDescription: String? {
             switch self {
             case .buildingRetrievalFailed(let message):
-                return "Building retrieval failed: \(message)"
+                return "楼栋信息获取失败: \(message)"
             case .campusNotFound(let message):
-                return "Campus not found: \(message)"
+                return "未找到校区: \(message)"
             case .electricityRetrievalFailed(let message):
-                return "Electricity retrieval failed: \(message)"
+                return "电费信息获取失败: \(message)"
             }
         }
     }
