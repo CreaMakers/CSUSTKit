@@ -58,18 +58,18 @@ public class SSOHelper {
         }
 
         guard let value = response.value else {
-            throw SSOHelperError.getLoginFormFailed("Failed to retrieve login form")
+            throw SSOHelperError.getLoginFormFailed("获取登录表单失败")
         }
 
         let document = try SwiftSoup.parse(value)
         guard let pwdEncryptSaltInput = try document.select("input#pwdEncryptSalt").first()
         else {
-            throw SSOHelperError.getLoginFormFailed("pwdEncryptSalt input not found")
+            throw SSOHelperError.getLoginFormFailed("未找到pwdEncryptSalt输入框")
         }
 
         guard let executionInput = try document.select("input#execution").first()
         else {
-            throw SSOHelperError.getLoginFormFailed("execution input not found")
+            throw SSOHelperError.getLoginFormFailed("未找到execution输入框")
         }
 
         return (
@@ -87,12 +87,12 @@ public class SSOHelper {
         }
 
         guard let loginForm = loginForm else {
-            throw SSOHelperError.getLoginFormFailed("Login form not found")
+            throw SSOHelperError.getLoginFormFailed("未找到登录表单")
         }
 
         let needCaptcha = try await checkNeedCaptcha(username: username)
         guard !needCaptcha else {
-            throw SSOHelperError.loginFailed("Captcha is required, not implemented yet")
+            throw SSOHelperError.loginFailed("需要验证码，请前往ehall.csust.edu.cn手动登录后再重新尝试")
         }
 
         let encryptedPassword = AESUtils.encryptPassword(
@@ -119,14 +119,14 @@ public class SSOHelper {
         let response = await request.serializingString().response
 
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginFailed("Login failed, no redirect URL found")
+            throw SSOHelperError.loginFailed("登录失败，未找到重定向URL")
         }
 
         guard
             finalURL == URL(string: "https://ehall.csust.edu.cn/index.html")
                 || finalURL == URL(string: "https://ehall.csust.edu.cn/default/index.html")
         else {
-            throw SSOHelperError.loginFailed("Login failed, unexpected redirect URL: \(finalURL)")
+            throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
         }
     }
 
@@ -139,7 +139,7 @@ public class SSOHelper {
             .serializingDecodable(LoginUserResponse.self).value
 
         guard let user = response.data else {
-            throw SSOHelperError.loginUserRetrievalFailed("Login user data not found")
+            throw SSOHelperError.loginUserRetrievalFailed("未找到登录用户数据")
         }
         return user
     }
@@ -164,7 +164,7 @@ public class SSOHelper {
         ).serializingString().value
 
         guard !response.contains("请输入账号") else {
-            throw SSOHelperError.loginToEducationFailed("Login to education failed")
+            throw SSOHelperError.loginToEducationFailed("教务登录失败")
         }
 
         return session
@@ -175,12 +175,11 @@ public class SSOHelper {
         let response = await request.serializingString().response
 
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginToMoocFailed("Login to Mooc failed, no redirect URL found")
+            throw SSOHelperError.loginToMoocFailed("网络课程中心登录失败，未找到重定向URL")
         }
 
         guard finalURL == URL(string: "http://pt.csust.edu.cn/meol/personal.do") else {
-            throw SSOHelperError.loginToMoocFailed(
-                "Login to Mooc failed, unexpected redirect URL: \(finalURL)")
+            throw SSOHelperError.loginToMoocFailed("网络课程中心登录失败，重定向URL异常: \(finalURL)")
         }
 
         return session
@@ -191,7 +190,7 @@ public class SSOHelper {
             "https://authserver.csust.edu.cn/authserver/getCaptcha.htl"
         ).serializingData().value
         guard !response.isEmpty else {
-            throw SSOHelperError.captchaRetrievalFailed("Failed to retrieve captcha")
+            throw SSOHelperError.captchaRetrievalFailed("获取验证码失败")
         }
         return response
     }
@@ -214,13 +213,12 @@ public class SSOHelper {
 
         let (data, _) = try await URLSession.shared.data(for: request)
         guard !data.isEmpty else {
-            throw SSOHelperError.dynamicCodeRetrievalFailed("Failed to retrieve dynamic code")
+            throw SSOHelperError.dynamicCodeRetrievalFailed("获取动态码失败")
         }
 
         let response = try JSONDecoder().decode(GetDynamicCodeResponse.self, from: data)
         guard response.code == "success" else {
-            throw SSOHelperError.dynamicCodeRetrievalFailed(
-                "Failed to retrieve dynamic code: \(response.message)")
+            throw SSOHelperError.dynamicCodeRetrievalFailed("获取动态码失败: \(response.message)")
         }
     }
 
@@ -231,7 +229,7 @@ public class SSOHelper {
         }
 
         guard let loginForm = loginForm else {
-            throw SSOHelperError.getLoginFormFailed("Login form not found")
+            throw SSOHelperError.getLoginFormFailed("未找到登录表单")
         }
 
         let parameters: [String: String] = [
@@ -252,11 +250,11 @@ public class SSOHelper {
         let response = await request.serializingString().response
 
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginFailed("Login failed, no redirect URL found")
+            throw SSOHelperError.loginFailed("登录失败，未找到重定向URL")
         }
 
         guard finalURL == URL(string: "https://ehall.csust.edu.cn/index.html") else {
-            throw SSOHelperError.loginFailed("Login failed, unexpected redirect URL: \(finalURL)")
+            throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是验证码错误")
         }
     }
 }

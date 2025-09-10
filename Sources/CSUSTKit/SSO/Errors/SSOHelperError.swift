@@ -13,19 +13,19 @@ extension SSOHelper {
         var errorDescription: String? {
             switch self {
             case .getLoginFormFailed(let message):
-                return "Get login form failed: \(message)"
+                return "获取登录表单失败: \(message)"
             case .loginFailed(let message):
-                return "Login failed: \(message)"
+                return "登录失败: \(message)"
             case .loginUserRetrievalFailed(let message):
-                return "Login user retrieval failed: \(message)"
+                return "获取登录用户信息失败: \(message)"
             case .loginToEducationFailed(let message):
-                return "Login to education system failed: \(message)"
+                return "教务系统登录失败: \(message)"
             case .captchaRetrievalFailed(let message):
-                return "Captcha retrieval failed: \(message)"
+                return "验证码获取失败: \(message)"
             case .dynamicCodeRetrievalFailed(let message):
-                return "Dynamic code retrieval failed: \(message)"
+                return "动态码获取失败: \(message)"
             case .loginToMoocFailed(let message):
-                return "Login to MOOC system failed: \(message)"
+                return "网络课程中心登录失败: \(message)"
             }
         }
     }
