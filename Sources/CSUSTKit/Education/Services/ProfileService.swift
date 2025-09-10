@@ -11,19 +11,19 @@ extension EduHelper {
 
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#xjkpTable > tbody").first() else {
-                throw EduHelperError.profileRetrievalFailed("Profile table not found")
+                throw EduHelperError.profileRetrievalFailed("未找到个人信息表")
             }
             let rows = try table.select("tr")
 
             func parseTableCell(_ rows: Elements, _ rowIndex: Int, _ colIndex: Int) throws -> String
             {
                 guard rowIndex < rows.count else {
-                    throw EduHelperError.profileRetrievalFailed("Row index out of bounds")
+                    throw EduHelperError.profileRetrievalFailed("行索引越界")
                 }
                 let row = rows[rowIndex]
                 let cols = try row.select("td")
                 guard colIndex < cols.count else {
-                    throw EduHelperError.profileRetrievalFailed("Column index out of bounds")
+                    throw EduHelperError.profileRetrievalFailed("列索引越界")
                 }
                 return try cols[colIndex].text().trim()
             }

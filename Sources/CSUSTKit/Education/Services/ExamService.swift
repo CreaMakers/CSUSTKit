@@ -35,7 +35,7 @@ extension EduHelper {
 
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#dataList").first() else {
-                throw EduHelperError.examScheduleRetrievalFailed("Exam schedule table not found")
+                throw EduHelperError.examScheduleRetrievalFailed("未找到考试安排表")
             }
             guard !(try table.html().contains("未查询到数据")) else {
                 return []
@@ -49,7 +49,7 @@ extension EduHelper {
                 let cols = try row.select("td")
                 guard cols.count >= 11 else {
                     throw EduHelperError.examScheduleRetrievalFailed(
-                        "Row does not contain enough columns: \(cols.count)")
+                        "行列数不足: \(cols.count)")
                 }
 
                 let examTimeRange = try parseDate(from: try cols[6].text().trim())
@@ -85,7 +85,7 @@ extension EduHelper {
             let document = try SwiftSoup.parse(response)
             guard let semesterSelect = try document.select("#xnxqid").first() else {
                 throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed(
-                    "Semester select element not found")
+                    "未找到学期选择元素")
             }
 
             let options = try semesterSelect.select("option")
@@ -101,12 +101,12 @@ extension EduHelper {
 
             guard !semesters.isEmpty else {
                 throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed(
-                    "No semesters found in the select element")
+                    "学期选择元素中未找到学期")
             }
 
             guard let defaultSemester = defaultSemester else {
                 throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed(
-                    "Default semester not found")
+                    "未找到默认学期")
             }
 
             return (semesters, defaultSemester)
@@ -123,13 +123,13 @@ extension EduHelper {
         private func parseDate(from dateString: String) throws -> (Date, Date) {
             let components = dateString.split(separator: " ")
             guard components.count == 2 else {
-                throw EduHelperError.dateParsingFailed("Invalid date string format: \(dateString)")
+                throw EduHelperError.dateParsingFailed("日期字符串格式无效: \(dateString)")
             }
             let timeComponents = components[1].split(separator: "~")
 
             guard timeComponents.count == 2 else {
                 throw EduHelperError.dateParsingFailed(
-                    "Invalid time format in date string: \(dateString)")
+                    "日期字符串中的时间格式无效: \(dateString)")
             }
 
             guard
@@ -138,7 +138,7 @@ extension EduHelper {
                 let endDate = Self.dateFormatter.date(from: "\(components[0]) \(timeComponents[1])")
             else {
                 throw EduHelperError.dateParsingFailed(
-                    "Failed to parse date from string: \(dateString)")
+                    "无法从字符串解析日期: \(dateString)")
             }
             return (startDate, endDate)
         }

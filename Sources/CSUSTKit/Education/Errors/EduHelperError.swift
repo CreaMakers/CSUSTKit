@@ -19,31 +19,31 @@ extension EduHelper {
         var errorDescription: String? {
             switch self {
             case .loginFailed(let message):
-                return "Login failed: \(message)"
+                return "登录失败: \(message)"
             case .profileRetrievalFailed(let message):
-                return "Profile retrieval failed: \(message)"
+                return "个人信息获取失败: \(message)"
             case .notLoggedIn(let message):
-                return "Not logged in: \(message)"
+                return "未登录: \(message)"
             case .examScheduleRetrievalFailed(let message):
-                return "Exam schedule retrieval failed: \(message)"
+                return "考试安排获取失败: \(message)"
             case .availableSemestersForExamScheduleRetrievalFailed(let message):
-                return "Available semesters for exam schedule retrieval failed: \(message)"
+                return "考试安排可选学期获取失败: \(message)"
             case .courseGradesRetrievalFailed(let message):
-                return "Course grades retrieval failed: \(message)"
+                return "课程成绩获取失败: \(message)"
             case .availableSemestersForCourseGradesRetrievalFailed(let message):
-                return "Available semesters for course grades retrieval failed: \(message)"
+                return "课程成绩可选学期获取失败: \(message)"
             case .gradeDetailRetrievalFailed(let message):
-                return "Grade detail retrieval failed: \(message)"
+                return "成绩详情获取失败: \(message)"
             case .courseScheduleRetrievalFailed(let message):
-                return "Course schedule retrieval failed: \(message)"
+                return "课程表获取失败: \(message)"
             case .availableSemestersForCourseScheduleRetrievalFailed(let message):
-                return "Available semesters for course schedule retrieval failed: \(message)"
+                return "课程表可选学期获取失败: \(message)"
             case .semesterStartDateRetrievalFailed(let message):
-                return "Semester start date retrieval failed: \(message)"
+                return "学期开始日期获取失败: \(message)"
             case .availableSemestersForStartDateRetrievalFailed(let message):
-                return "Available semesters for start date retrieval failed: \(message)"
+                return "开始日期可选学期获取失败: \(message)"
             case .dateParsingFailed(let message):
-                return "Date parsing failed: \(message)"
+                return "日期解析失败: \(message)"
             }
         }
     }

@@ -21,7 +21,7 @@ extension EduHelper {
             .serializingString().value
 
             if isLoginRequired(response: response) {
-                throw EduHelperError.notLoggedIn("User is not logged in")
+                throw EduHelperError.notLoggedIn("未登录或登录已过期，请重新登录")
             }
 
             return response

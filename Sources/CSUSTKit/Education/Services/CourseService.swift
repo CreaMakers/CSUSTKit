@@ -32,7 +32,7 @@ extension EduHelper {
             let document = try SwiftSoup.parse(response)
 
             guard let table = try document.select("#dataList").first() else {
-                throw EduHelperError.courseGradesRetrievalFailed("Course grades table not found")
+                throw EduHelperError.courseGradesRetrievalFailed("未找到课程成绩表格")
             }
             guard !(try table.html().contains("未查询到数据")) else {
                 return []
@@ -46,7 +46,7 @@ extension EduHelper {
                 let cols = try row.select("td")
                 guard cols.count >= 17 else {
                     throw EduHelperError.courseGradesRetrievalFailed(
-                        "Row does not contain enough columns: \(cols.count)")
+                        "行列数不足: \(cols.count)")
                 }
 
                 let semester = try cols[1].text().trim()
@@ -56,11 +56,11 @@ extension EduHelper {
                 let gradeString = try cols[5].text().trim()
                 guard let grade = Int(gradeString) else {
                     throw EduHelperError.courseGradesRetrievalFailed(
-                        "Invalid grade format: \(gradeString)")
+                        "成绩格式无效: \(gradeString)")
                 }
                 let gradeDetailUrl = try cols[5].select("a").first()?.attr("href").trim()
                 guard var gradeDetailUrl = gradeDetailUrl else {
-                    throw EduHelperError.courseGradesRetrievalFailed("Grade detail URL not found")
+                    throw EduHelperError.courseGradesRetrievalFailed("未找到成绩详情URL")
                 }
                 gradeDetailUrl =
                     gradeDetailUrl
@@ -73,17 +73,17 @@ extension EduHelper {
                 let creditString = try cols[8].text().trim()
                 guard let credit = Double(creditString) else {
                     throw EduHelperError.courseGradesRetrievalFailed(
-                        "Invalid credit format: \(creditString)")
+                        "学分格式无效: \(creditString)")
                 }
                 let totalHoursString = try cols[9].text().trim()
                 guard let totalHours = Int(totalHoursString) else {
                     throw EduHelperError.courseGradesRetrievalFailed(
-                        "Invalid total hours format: \(totalHoursString)")
+                        "总学时格式无效: \(totalHoursString)")
                 }
                 let gradePointString = try cols[10].text().trim()
                 guard let gradePoint = Double(gradePointString) else {
                     throw EduHelperError.courseGradesRetrievalFailed(
-                        "Invalid grade point format: \(gradePointString)")
+                        "绩点格式无效: \(gradePointString)")
                 }
                 let retakeSemester = try cols[11].text().trim()
                 let assessmentMethod = try cols[12].text().trim()
@@ -92,7 +92,7 @@ extension EduHelper {
                 let courseNatureString = try cols[15].text().trim()
                 guard let courseNature = CourseNature(rawValue: courseNatureString) else {
                     throw EduHelperError.courseGradesRetrievalFailed(
-                        "Invalid course nature: \(courseNatureString)")
+                        "课程性质无效: \(courseNatureString)")
                 }
                 let courseCategory = try cols[16].text().trim()
 
@@ -132,7 +132,7 @@ extension EduHelper {
             let document = try SwiftSoup.parse(response)
             guard let semesterSelect = try document.select("#kksj").first() else {
                 throw EduHelperError.availableSemestersForCourseGradesRetrievalFailed(
-                    "Semester select element not found")
+                    "未找到学期选择元素")
             }
 
             let options = try semesterSelect.select("option")
@@ -153,12 +153,12 @@ extension EduHelper {
 
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#dataList").first() else {
-                throw EduHelperError.gradeDetailRetrievalFailed("Grade detail table not found")
+                throw EduHelperError.gradeDetailRetrievalFailed("未找到成绩详情表格")
             }
             let rows = try table.select("tr")
             guard rows.count >= 2 else {
                 throw EduHelperError.gradeDetailRetrievalFailed(
-                    "Grade detail table does not contain enough rows")
+                    "成绩详情表行数不足")
             }
             let headerRow = rows[0]
             let headerCols = try headerRow.select("th")
@@ -167,7 +167,7 @@ extension EduHelper {
 
             guard headerCols.count >= 4, valueCols.count >= 4 else {
                 throw EduHelperError.gradeDetailRetrievalFailed(
-                    "Grade detail table does not contain enough columns: \(headerCols.count), \(valueCols.count)"
+                    "成绩详情表列数不足: \(headerCols.count), \(valueCols.count)"
                 )
             }
 
@@ -181,12 +181,12 @@ extension EduHelper {
 
                 guard let ratio = Int(ratioString) else {
                     throw EduHelperError.gradeDetailRetrievalFailed(
-                        "Invalid ratio format: \(ratioString)")
+                        "比例格式无效: \(ratioString)")
                 }
 
                 guard let gradeValue = Double(grade) else {
                     throw EduHelperError.gradeDetailRetrievalFailed(
-                        "Invalid grade format: \(grade)")
+                        "成绩格式无效: \(grade)")
                 }
                 let component = GradeComponent(
                     type: type,
@@ -200,7 +200,7 @@ extension EduHelper {
             guard let totalGradeString = totalGrade, let totalGradeValue = Int(totalGradeString)
             else {
                 throw EduHelperError.gradeDetailRetrievalFailed(
-                    "Invalid total grade format: \(String(describing: totalGrade))")
+                    "总成绩格式无效: \(String(describing: totalGrade))")
             }
             return GradeDetail(components: components, totalGrade: totalGradeValue)
         }
@@ -221,12 +221,12 @@ extension EduHelper {
             }
             guard let weekType = weekType else {
                 throw EduHelperError.courseScheduleRetrievalFailed(
-                    "Invalid week type in date: \(date).")
+                    "日期中周类型无效: \(date)")
             }
 
             let parts = date.components(separatedBy: weekType.rawValue)
             guard parts.count == 2 else {
-                throw EduHelperError.courseScheduleRetrievalFailed("Invalid date format: \(date).")
+                throw EduHelperError.courseScheduleRetrievalFailed("日期格式无效: \(date)")
             }
             let weekPart = parts[0]
             let sectionPart = parts[1].trimmingCharacters(in: CharacterSet(charactersIn: "[]节"))
@@ -241,11 +241,11 @@ extension EduHelper {
                         let endWeek = Int(rangeParts[1].trim())
                     else {
                         throw EduHelperError.courseScheduleRetrievalFailed(
-                            "Invalid week range format: \(weekSection)")
+                            "周范围格式无效: \(weekSection)")
                     }
                     if startWeek > endWeek {
                         throw EduHelperError.courseScheduleRetrievalFailed(
-                            "Start week \(startWeek) is greater than end week \(endWeek).")
+                            "起始周 \(startWeek) 大于结束周 \(endWeek)")
                     }
                     switch weekType {
                     case .single:
@@ -260,7 +260,7 @@ extension EduHelper {
                         weeks.append(week)
                     } else {
                         throw EduHelperError.courseScheduleRetrievalFailed(
-                            "Invalid week format: \(weekSection)")
+                            "周格式无效: \(weekSection)")
                     }
                 }
             }
@@ -268,7 +268,7 @@ extension EduHelper {
             for section in sectionPart.components(separatedBy: "-") {
                 guard let sectionNumber = Int(section) else {
                     throw EduHelperError.courseScheduleRetrievalFailed(
-                        "Invalid section format: \(section)")
+                        "节次格式无效: \(section)")
                 }
                 sections.append(sectionNumber)
             }
@@ -293,7 +293,7 @@ extension EduHelper {
 
             guard let contentElement = try element.select("div.kbcontent").first() else {
                 throw EduHelperError.courseScheduleRetrievalFailed(
-                    "Course content element not found")
+                    "未找到课程内容元素")
             }
 
             var courseSchedules: [ParsedItem] = []
@@ -307,11 +307,11 @@ extension EduHelper {
 
                 let courseFragment = try SwiftSoup.parseBodyFragment(trimmedHTML)
                 guard let courseBody = try courseFragment.select("body").first() else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("Course body not found")
+                    throw EduHelperError.courseScheduleRetrievalFailed("未找到课程主体")
                 }
 
                 guard let courseName = courseBody.textNodes().first?.text().trim() else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("Course name not found")
+                    throw EduHelperError.courseScheduleRetrievalFailed("未找到课程名称")
                 }
 
                 var groupName: String? = nil
@@ -323,22 +323,22 @@ extension EduHelper {
 
                 guard let teacherName = try courseBody.select("font[title='老师']").first()?.text()
                 else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("Teacher name not found")
+                    throw EduHelperError.courseScheduleRetrievalFailed("未找到教师名称")
                 }
                 let classroom = try courseBody.select("font[title='教室']").first()?.text()
                 guard let dateText = try courseBody.select("font[title='周次(节次)']").first()?.text()
                 else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("Date text not found")
+                    throw EduHelperError.courseScheduleRetrievalFailed("未找到日期文本")
                 }
                 let (weeks, sections) = try parseDate(date: dateText)
                 guard !weeks.isEmpty, !sections.isEmpty else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("Invalid weeks or sections")
+                    throw EduHelperError.courseScheduleRetrievalFailed("周或节次无效")
                 }
 
                 guard let startSession = sections.first,
                     let endSession = sections.last
                 else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("Invalid section range")
+                    throw EduHelperError.courseScheduleRetrievalFailed("节次范围无效")
                 }
 
                 courseSchedules.append(
@@ -371,7 +371,7 @@ extension EduHelper {
 
             guard let table = try document.select("#kbtable").first() else {
                 throw EduHelperError.courseScheduleRetrievalFailed(
-                    "Course schedule table not found")
+                    "未找到课程表")
             }
 
             var courseDictionary: [String: Course] = [:]
@@ -384,7 +384,7 @@ extension EduHelper {
                 for (colIndex, col) in cols.enumerated() {
                     guard let day = DayOfWeek(rawValue: colIndex) else {
                         throw EduHelperError.courseScheduleRetrievalFailed(
-                            "Invalid day of week index: \(colIndex)")
+                            "星期索引无效: \(colIndex)")
                     }
 
                     let parsedItems = try parseCourse(element: col)
@@ -426,7 +426,7 @@ extension EduHelper {
 
             guard let semesterSelect = try document.select("#xnxq01id").first() else {
                 throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed(
-                    "Semester select element not found")
+                    "未找到学期选择元素")
             }
 
             let options = try semesterSelect.select("option")
@@ -443,12 +443,12 @@ extension EduHelper {
 
             guard !semesters.isEmpty else {
                 throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed(
-                    "No semesters found in the select element")
+                    "学期选择元素中未找到学期")
             }
 
             guard let defaultSemester = defaultSemester else {
                 throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed(
-                    "Default semester not found")
+                    "未找到默认学期")
             }
 
             return (semesters, defaultSemester)

@@ -18,19 +18,19 @@ extension EduHelper {
 
             guard let table = try document.select("#kbtable").first() else {
                 throw EduHelperError.semesterStartDateRetrievalFailed(
-                    "Semester start date table not found")
+                    "未找到学期首日表")
             }
 
             let rows = try table.select("tr")
             guard rows.count > 1 else {
                 throw EduHelperError.semesterStartDateRetrievalFailed(
-                    "Semester start date table does not contain enough rows")
+                    "学期首日表行数不足")
             }
             let targetRow = rows[1]
             let cols = try targetRow.select("td")
             guard cols.count > 1 else {
                 throw EduHelperError.semesterStartDateRetrievalFailed(
-                    "Target row does not contain enough columns")
+                    "目标行列数不足")
             }
             let startDateText = try cols[1].attr("title").trim()
 
@@ -38,7 +38,7 @@ extension EduHelper {
             dateFormatter.dateFormat = "yyyy年MM月dd"
             guard let startDate = dateFormatter.date(from: startDateText) else {
                 throw EduHelperError.semesterStartDateRetrievalFailed(
-                    "Failed to parse semester start date: \(startDateText)")
+                    "无法解析学期首日: \(startDateText)")
             }
 
             return startDate
@@ -54,7 +54,7 @@ extension EduHelper {
 
             guard let select = try document.select("#xnxq01id").first() else {
                 throw EduHelperError.availableSemestersForStartDateRetrievalFailed(
-                    "Semester select element not found")
+                    "未找到学期选择元素")
             }
 
             let options = try select.select("option")
@@ -71,12 +71,12 @@ extension EduHelper {
 
             guard !semesters.isEmpty else {
                 throw EduHelperError.availableSemestersForStartDateRetrievalFailed(
-                    "No semesters found in the select element")
+                    "学期选择元素中未找到学期")
             }
 
             guard let defaultSemester = defaultSemester else {
                 throw EduHelperError.availableSemestersForStartDateRetrievalFailed(
-                    "Default semester not found")
+                    "未找到默认学期")
             }
 
             return (semesters, defaultSemester)
