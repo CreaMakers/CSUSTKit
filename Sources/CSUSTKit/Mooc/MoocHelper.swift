@@ -17,7 +17,7 @@ public class MoocHelper {
         let elements = try document.select(".userinfobody > ul > li")
 
         guard elements.count >= 5 else {
-            throw MoocHelperError.profileRetrievalFailed("Unexpected profile format")
+            throw MoocHelperError.profileRetrievalFailed("个人信息格式异常")
         }
 
         let name = try elements[1].text()
@@ -26,7 +26,7 @@ public class MoocHelper {
         let loginCountText = try elements[4].text().replacingOccurrences(of: "登录次数：", with: "")
 
         guard let loginCount = Int(loginCountText) else {
-            throw MoocHelperError.profileRetrievalFailed("Invalid login count format")
+            throw MoocHelperError.profileRetrievalFailed("登录次数格式无效")
         }
 
         return Profile(
@@ -44,13 +44,13 @@ public class MoocHelper {
         let document = try SwiftSoup.parse(response)
 
         guard let tableElement = try document.getElementById("table2") else {
-            throw MoocHelperError.courseRetrievalFailed("Course table not found")
+            throw MoocHelperError.courseRetrievalFailed("未找到课程表格")
         }
 
         let rows = try tableElement.select("tr")
 
         guard rows.count >= 1 else {
-            throw MoocHelperError.courseRetrievalFailed("Invalid course table format")
+            throw MoocHelperError.courseRetrievalFailed("课程表格格式无效")
         }
 
         var courses: [Course] = []
@@ -60,13 +60,13 @@ public class MoocHelper {
             let cols = try row.select("td")
 
             guard cols.count >= 4 else {
-                throw MoocHelperError.courseRetrievalFailed("Unexpected course row format")
+                throw MoocHelperError.courseRetrievalFailed("课程行格式异常")
             }
 
             let number = try cols[0].text()
             let name = try cols[1].text()
             guard let a = try cols[1].getElementsByTag("a").first() else {
-                throw MoocHelperError.courseRetrievalFailed("Course id not found")
+                throw MoocHelperError.courseRetrievalFailed("未找到课程ID")
             }
             let id = (try a.attr("onclick"))
                 .replacingOccurrences(of: "window.open('../homepage/course/course_index.jsp?courseId=", with: "")
@@ -125,13 +125,13 @@ public class MoocHelper {
         let document = try SwiftSoup.parse(response)
 
         guard let tableElement = try document.getElementsByClass("valuelist").first() else {
-            throw MoocHelperError.testRetrievalFailed("Test table not found")
+            throw MoocHelperError.testRetrievalFailed("未找到测试表格")
         }
 
         let rows = try tableElement.getElementsByTag("tr")
 
         guard rows.count >= 1 else {
-            throw MoocHelperError.testRetrievalFailed("Invalid test table format")
+            throw MoocHelperError.testRetrievalFailed("测试表格格式无效")
         }
 
         var tests: [Test] = []
@@ -141,7 +141,7 @@ public class MoocHelper {
             let cols = try row.getElementsByTag("td")
 
             guard cols.count >= 8 else {
-                throw MoocHelperError.testRetrievalFailed("Unexpected test row format")
+                throw MoocHelperError.testRetrievalFailed("测试表格行格式异常")
             }
 
             let title = try cols[0].text()
@@ -150,7 +150,7 @@ public class MoocHelper {
             let rawAllowRetake = try cols[3].text()
             let allowRetake = rawAllowRetake == "不限制" ? nil : Int(rawAllowRetake)
             guard let timeLimit = Int(try cols[4].text()) else {
-                throw MoocHelperError.testRetrievalFailed("Invalid time limit format")
+                throw MoocHelperError.testRetrievalFailed("时间限制格式无效")
             }
             let isSubmitted = try cols[7].html().contains("查看结果")
             tests.append(
@@ -173,11 +173,11 @@ public class MoocHelper {
         let document = try SwiftSoup.parse(response)
 
         guard let reminderElement = try document.getElementById("reminder") else {
-            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("Reminder section not found")
+            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("未找到提醒区域")
         }
 
         guard let courseNamesContainer = try reminderElement.getElementsByTag("li").first() else {
-            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("No reminders found")
+            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("未找到任何提醒")
         }
 
         let courseNameElements = try courseNamesContainer.select("li > ul > li > a")

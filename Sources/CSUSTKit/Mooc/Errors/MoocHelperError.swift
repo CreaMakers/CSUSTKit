@@ -10,13 +10,13 @@ extension MoocHelper {
         var errorDescription: String? {
             switch self {
             case .profileRetrievalFailed(let message):
-                return "Profile retrieval failed: \(message)"
+                return "获取个人信息失败: \(message)"
             case .courseRetrievalFailed(let message):
-                return "Course retrieval failed: \(message)"
+                return "获取课程信息失败: \(message)"
             case .testRetrievalFailed(let message):
-                return "Test retrieval failed: \(message)"
+                return "获取测验信息失败: \(message)"
             case .courseNamesWithPendingHomeworksRetrievalFailed(let message):
-                return "Course names with pending homeworks retrieval failed: \(message)"
+                return "获取有待完成作业的课程名称失败: \(message)"
             }
         }
     }
