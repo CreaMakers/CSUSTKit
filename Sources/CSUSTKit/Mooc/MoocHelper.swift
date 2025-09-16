@@ -1,6 +1,7 @@
 import Alamofire
 import SwiftSoup
 
+/// 网络课程中心助手
 public class MoocHelper {
     var session: Session
 
@@ -8,6 +9,9 @@ public class MoocHelper {
         self.session = session
     }
 
+    /// 获取个人信息
+    /// - Throws: `MoocHelperError`
+    /// - Returns: 个人信息
     public func getProfile() async throws -> Profile {
         let response = try await session.request("http://pt.csust.edu.cn/meol/personal.do")
             .serializingString(encoding: .gbk).value
@@ -37,6 +41,9 @@ public class MoocHelper {
         )
     }
 
+    /// 获取课程列表
+    /// - Throws: `MoocHelperError`
+    /// - Returns: 课程列表
     public func getCourses() async throws -> [Course] {
         let response = try await session.request(
             "http://pt.csust.edu.cn/meol/lesson/blen.student.lesson.list.jsp"
@@ -87,6 +94,10 @@ public class MoocHelper {
         return courses
     }
 
+    /// 获取课程作业列表
+    /// - Parameter courseId: 课程ID
+    /// - Throws: `MoocHelperError`
+    /// - Returns: 课程作业列表
     public func getCourseHomeworks(courseId: String) async throws -> [Homework] {
         struct Response: Codable {
             struct Datas: Codable {
@@ -120,6 +131,10 @@ public class MoocHelper {
         } ?? []
     }
 
+    /// 获取课程测验列表
+    /// - Parameter courseId: 课程ID
+    /// - Throws: `MoocHelperError`
+    /// - Returns: 课程测验列表
     public func getCourseTests(courseId: String) async throws -> [Test] {
         let response = try await session.request("http://pt.csust.edu.cn/meol/common/question/test/student/list.jsp?sortColumn=createTime&sortDirection=-1&cateId=\(courseId)&pagingPage=1&status=1&pagingNumberPer=1000").serializingString(encoding: .gbk).value
         let document = try SwiftSoup.parse(response)
@@ -168,6 +183,9 @@ public class MoocHelper {
         return tests
     }
 
+    /// 获取有待完成作业的课程名称
+    /// - Throws: `MoocHelperError`
+    /// - Returns: 课程名称列表及其对应的课程ID
     public func getCourseNamesWithPendingHomeworks() async throws -> [(name: String, id: String)] {
         let response = try await session.request("http://pt.csust.edu.cn/meol/welcomepage/student/interaction_reminder_v8.jsp").serializingString(encoding: .gbk).value
         let document = try SwiftSoup.parse(response)
@@ -195,6 +213,7 @@ public class MoocHelper {
         return courseNames
     }
 
+    /// 登出
     public func logout() async throws {
         _ = try await session.request("http://pt.csust.edu.cn/meol/homepage/V8/include/logout.jsp")
             .serializingString(encoding: .gbk).value
