@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p CSUSTKit.docc
+
 rm -rf docs/
 
 swift build --target CSUSTKit \
