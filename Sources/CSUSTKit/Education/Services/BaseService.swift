@@ -12,9 +12,7 @@ extension EduHelper {
             return response.contains("请输入账号")
         }
 
-        internal func performRequest(
-            _ url: String, _ method: HTTPMethod = .get, _ parameters: [String: String]? = nil
-        ) async throws -> String {
+        internal func performRequest(_ url: String, _ method: HTTPMethod = .get, _ parameters: [String: String]? = nil) async throws -> String {
             let response = try await session.request(
                 url, method: method, parameters: parameters, encoding: URLEncoding.default
             )

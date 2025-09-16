@@ -1,5 +1,5 @@
 extension EduHelper {
-    /// 学期类型枚举
+    /// 学期类型
     public enum SemesterType: String, CaseIterable {
         /// 期初
         case beginning = "期初"
@@ -8,6 +8,7 @@ extension EduHelper {
         /// 期末
         case end = "期末"
 
+        /// 学期类型ID
         var id: String {
             switch self {
             case .beginning:

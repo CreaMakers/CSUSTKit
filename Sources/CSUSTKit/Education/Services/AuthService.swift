@@ -2,10 +2,10 @@ import Alamofire
 import Foundation
 
 extension EduHelper {
+    /// 认证服务
     public class AuthService: BaseService {
-        /**
-         * 检查当前登录状态
-         */
+        /// 检查当前登录状态
+        /// - Returns: 是否已登录
         public func checkLoginStatus() async throws -> Bool {
             let response = try await session.request(
                 "http://xk.csust.edu.cn/jsxsd/framework/xsMain.jsp"
@@ -14,12 +14,11 @@ extension EduHelper {
             return !isLoginRequired(response: response)
         }
 
-        /**
-         * 登录
-         * - Parameters:
-         *   - username: 用户名
-         *   - password: 密码
-         */
+        /// 登录
+        /// - Parameters:
+        ///   - username: 用户名
+        ///   - password: 密码
+        /// - Throws: `EduHelperError`
         public func login(username: String, password: String) async throws {
             let codeResponse = try await session.request(
                 "http://xk.csust.edu.cn/Logon.do?method=logon&flag=sess", method: .post
@@ -70,9 +69,7 @@ extension EduHelper {
             }
         }
 
-        /**
-         * 登出
-         */
+        /// 登出当前用户
         public func logout() async throws {
             let timestamp = Int(Date().timeIntervalSince1970 * 1000)
             _ = try await session.request(

@@ -1,11 +1,11 @@
 import SwiftSoup
 
 extension EduHelper {
+    /// 个人档案服务
     public class ProfileService: BaseService {
-        /**
-         * 获取学生档案信息
-         * - Returns: 学生档案信息
-         */
+        /// 获取学生档案信息
+        /// - Throws: `EduHelperError`
+        /// - Returns: 学生档案信息
         public func getProfile() async throws -> Profile {
             let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/grxx/xsxx")
 
@@ -15,8 +15,7 @@ extension EduHelper {
             }
             let rows = try table.select("tr")
 
-            func parseTableCell(_ rows: Elements, _ rowIndex: Int, _ colIndex: Int) throws -> String
-            {
+            func parseTableCell(_ rows: Elements, _ rowIndex: Int, _ colIndex: Int) throws -> String {
                 guard rowIndex < rows.count else {
                     throw EduHelperError.profileRetrievalFailed("行索引越界")
                 }

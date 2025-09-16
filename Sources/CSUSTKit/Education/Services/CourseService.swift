@@ -3,24 +3,20 @@ import Foundation
 import SwiftSoup
 
 extension EduHelper {
+    /// 课程服务
     public class CourseService: BaseService {
-        /**
-         * 获取课程成绩
-         * - Parameters:
-         *   - academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则为全部学期
-         *   - courseNature: 课程性质，如果为 `nil` 则查询所有性质的课程
-         *   - courseName: 课程名称，默认为空字符串表示查询所有课程
-         *   - displayMode: 显示模式，默认为显示最好成绩
-         *   - studyMode: 修读方式，默认为主修
-         * - Returns: 课程成绩信息数组
-         */
-        public func getCourseGrades(
-            academicYearSemester: String = "", courseNature: CourseNature? = nil,
-            courseName: String = "",
-            displayMode: DisplayMode = .bestGrade, studyMode: StudyMode = .major
-        ) async throws -> [CourseGrade] {
+        /// 获取课程成绩
+        /// - Parameters:
+        ///   - academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则为全部学期
+        ///   - courseNature: 课程性质，如果为 `nil` 则查询所有性质的课程
+        ///   - courseName: 课程名称，默认为空字符串表示查询所有课程
+        ///   - displayMode: 显示模式，默认为显示最好成绩
+        ///   - studyMode: 修读方式，默认为主修
+        /// - Throws: `EduHelperError`
+        /// - Returns: 课程成绩信息数组
+        public func getCourseGrades(academicYearSemester: String? = nil, courseNature: CourseNature? = nil, courseName: String = "", displayMode: DisplayMode = .bestGrade, studyMode: StudyMode = .major) async throws -> [CourseGrade] {
             let queryParams = [
-                "kksj": academicYearSemester,
+                "kksj": academicYearSemester ?? "",
                 "kcxz": courseNature?.id ?? "",
                 "kcmc": courseName,
                 "xsfs": displayMode.id,
@@ -122,10 +118,9 @@ extension EduHelper {
             return courseGrades
         }
 
-        /**
-         * 获取课程成绩的所有可用学期
-         * - Returns: 包含所有可用学期的数组
-         */
+        /// 获取课程成绩的所有可用学期
+        /// - Throws: `EduHelperError`
+        /// - Returns: 包含所有可用学期的数组
         public func getAvailableSemestersForCourseGrades() async throws -> [String] {
             let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_query")
 
@@ -148,6 +143,10 @@ extension EduHelper {
             return semesters
         }
 
+        /// 获取成绩详情
+        /// - Parameter url: 课程详细URL
+        /// - Throws: `EduHelperError`
+        /// - Returns: 成绩详情
         public func getGradeDetail(url: String) async throws -> GradeDetail {
             let response = try await performRequest(url)
 
@@ -357,13 +356,11 @@ extension EduHelper {
             return courseSchedules
         }
 
-        /**
-         * 获取课程表
-         * - Parameter academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则查询默认学期
-         * - Returns: 课程信息数组
-         */
-        public func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [Course]
-        {
+        /// 获取课程表
+        /// - Parameter academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则查询默认学期
+        /// - Throws: `EduHelperError`
+        /// - Returns: 课程信息数组
+        public func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [Course] {
             let queryParams: [String: String] = ["xnxq01id": academicYearSemester ?? ""]
             let response = try await performRequest(
                 "http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do", .post, queryParams)
@@ -415,10 +412,9 @@ extension EduHelper {
             return Array(courseDictionary.values)
         }
 
-        /**
-         * 获取课程表的所有可用学期
-         * - Returns: 包含所有可用学期的数组和默认学期
-         */
+        /// 获取课程表的所有可用学期
+        /// - Throws: `EduHelperError`
+        /// - Returns: 包含所有可用学期的数组和默认学期
         public func getAvailableSemestersForCourseSchedule() async throws -> ([String], String) {
             let response = try await performRequest(
                 "http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do")

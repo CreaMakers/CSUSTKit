@@ -1,21 +1,36 @@
 import Foundation
 
 extension EduHelper {
+    /// 教务助手相关错误
     enum EduHelperError: Error, LocalizedError {
+        /// 登录失败
         case loginFailed(String)
+        /// 个人信息获取失败
         case profileRetrievalFailed(String)
+        /// 未登录
         case notLoggedIn(String)
+        /// 考试安排获取失败
         case examScheduleRetrievalFailed(String)
+        /// 考试安排可选学期获取失败
         case availableSemestersForExamScheduleRetrievalFailed(String)
+        /// 课程成绩获取失败
         case courseGradesRetrievalFailed(String)
+        /// 课程成绩可选学期获取失败
         case availableSemestersForCourseGradesRetrievalFailed(String)
+        /// 成绩详情获取失败
         case gradeDetailRetrievalFailed(String)
+        /// 课程表获取失败
         case courseScheduleRetrievalFailed(String)
+        /// 课程表可选学期获取失败
         case availableSemestersForCourseScheduleRetrievalFailed(String)
+        /// 学期开始日期获取失败
         case semesterStartDateRetrievalFailed(String)
+        /// 开始日期可选学期获取失败
         case availableSemestersForStartDateRetrievalFailed(String)
+        /// 日期解析失败
         case dateParsingFailed(String)
 
+        /// 错误描述
         var errorDescription: String? {
             switch self {
             case .loginFailed(let message):

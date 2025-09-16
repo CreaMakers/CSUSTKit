@@ -1,10 +1,14 @@
 extension EduHelper {
-    /// 修读方式枚举
+    /// 修读方式
     public enum StudyMode: String, CaseIterable {
+        /// 主修
         case major = "主修"
+        /// 辅修
         case minor = "辅修"
+        /// 全部
         case all = "全部"
 
+        /// 修读方式ID
         var id: String {
             switch self {
             case .major:

@@ -1,6 +1,7 @@
 import Alamofire
 import Foundation
 
+/// 校园卡助手
 public actor CampusCardHelper {
     let session: Session = Session()
 

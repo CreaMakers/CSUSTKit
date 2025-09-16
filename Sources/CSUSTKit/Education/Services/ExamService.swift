@@ -3,20 +3,15 @@ import Foundation
 import SwiftSoup
 
 extension EduHelper {
+    /// 考试服务
     public class ExamService: BaseService {
-        /**
-         * 获取考试安排
-         * - Parameters:
-         *   - academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则使用当前默认学期
-         *   - semesterType: 学期类型，如果为 `nil` 则查询所有类型的考试
-         * - Returns: 考试信息数组
-         */
-        public func getExamSchedule(
-            academicYearSemester: String? = nil, semesterType: SemesterType? = nil
-        )
-            async throws
-            -> [Exam]
-        {
+        /// 获取考试安排
+        /// - Parameters:
+        ///   - academicYearSemester: 学年学期，格式为 "2023-2024-1"，如果为 `nil` 则使用当前默认学期
+        ///   - semesterType: 学期类型，如果为 `nil` 则查询所有类型的考试
+        /// - Throws: `EduHelperError`
+        /// - Returns: 考试信息数组
+        public func getExamSchedule(academicYearSemester: String? = nil, semesterType: SemesterType? = nil) async throws -> [Exam] {
             var queryAcademicYearSemester: String
             if let academicYearSemester = academicYearSemester {
                 queryAcademicYearSemester = academicYearSemester
@@ -74,10 +69,9 @@ extension EduHelper {
             return exams
         }
 
-        /**
-         * 获取考试安排的所有可用学期以及默认学期
-         * - Returns: 包含所有可用学期的数组和默认学期
-         */
+        /// 获取考试安排的所有可用学期以及默认学期
+        /// - Throws: `EduHelperError`
+        /// - Returns: 包含所有可用学期的数组和默认学期
         public func getAvailableSemestersForExamSchedule() async throws -> ([String], String) {
             let response = try await performRequest(
                 "http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
