@@ -2,7 +2,7 @@ import Foundation
 
 extension CampusCardHelper {
     /// 校园卡助手相关错误
-    enum CampusCardHelperError: Error, LocalizedError {
+    public enum CampusCardHelperError: Error, LocalizedError {
         /// 楼栋信息获取失败
         case buildingRetrievalFailed(String)
         /// 未找到校区
@@ -11,7 +11,7 @@ extension CampusCardHelper {
         case electricityRetrievalFailed(String)
 
         /// 错误描述
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .buildingRetrievalFailed(let message):
                 return "楼栋信息获取失败: \(message)"

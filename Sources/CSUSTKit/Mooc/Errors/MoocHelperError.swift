@@ -2,7 +2,7 @@ import Foundation
 
 extension MoocHelper {
     /// 网络课程中心助手相关错误
-    enum MoocHelperError: Error, LocalizedError {
+    public enum MoocHelperError: Error, LocalizedError {
         /// 个人信息获取失败
         case profileRetrievalFailed(String)
         /// 课程信息获取失败
@@ -13,7 +13,7 @@ extension MoocHelper {
         case courseNamesWithPendingHomeworksRetrievalFailed(String)
 
         /// 错误描述
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .profileRetrievalFailed(let message):
                 return "获取个人信息失败: \(message)"

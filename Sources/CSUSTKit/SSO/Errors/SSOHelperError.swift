@@ -2,7 +2,7 @@ import Foundation
 
 extension SSOHelper {
     /// 统一身份认证相关错误
-    enum SSOHelperError: Error, LocalizedError {
+    public enum SSOHelperError: Error, LocalizedError {
         /// 获取登录表单失败
         case getLoginFormFailed(String)
         /// 登录失败
@@ -19,7 +19,7 @@ extension SSOHelper {
         case loginToMoocFailed(String)
 
         /// 错误描述
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .getLoginFormFailed(let message):
                 return "获取登录表单失败: \(message)"

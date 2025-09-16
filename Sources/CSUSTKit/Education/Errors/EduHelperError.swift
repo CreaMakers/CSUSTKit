@@ -2,7 +2,7 @@ import Foundation
 
 extension EduHelper {
     /// 教务助手相关错误
-    enum EduHelperError: Error, LocalizedError {
+    public enum EduHelperError: Error, LocalizedError {
         /// 登录失败
         case loginFailed(String)
         /// 个人信息获取失败
@@ -31,7 +31,7 @@ extension EduHelper {
         case dateParsingFailed(String)
 
         /// 错误描述
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
             case .loginFailed(let message):
                 return "登录失败: \(message)"
