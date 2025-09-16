@@ -2,6 +2,7 @@ import Alamofire
 import Foundation
 import SwiftSoup
 
+/// 统一身份认证助手
 public class SSOHelper {
     struct LoginForm {
         let pwdEncryptSalt: String
@@ -80,6 +81,11 @@ public class SSOHelper {
         )
     }
 
+    /// 登录统一身份认证
+    /// - Parameters:
+    ///   - username: 用户名
+    ///   - password: 密码
+    /// - Throws: `SSOHelperError`
     public func login(username: String, password: String) async throws {
         let (loginForm, isAlreadyLoggedIn) = try await getLoginForm()
         if isAlreadyLoggedIn {
@@ -130,6 +136,9 @@ public class SSOHelper {
         }
     }
 
+    /// 获取登录用户信息
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 用户信息
     public func getLoginUser() async throws -> Profile {
         struct LoginUserResponse: Decodable, Sendable {
             let data: Profile?
@@ -144,6 +153,7 @@ public class SSOHelper {
         return user
     }
 
+    /// 登出统一身份认证
     public func logout() async throws {
         _ = try await session.request("https://ehall.csust.edu.cn/logout").serializingData().value
         _ = try await session.request("https://authserver.csust.edu.cn/authserver/logout")
@@ -152,6 +162,9 @@ public class SSOHelper {
         session = Session()
     }
 
+    /// 从统一身份认证登录教务系统
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 教务系统的会话信息
     public func loginToEducation() async throws -> Session {
         _ = try await session.request(
             "http://xk.csust.edu.cn/sso.jsp",
@@ -170,6 +183,9 @@ public class SSOHelper {
         return session
     }
 
+    /// 从统一身份认证登录网络课程中心
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 网络课程中心的会话信息
     public func loginToMooc() async throws -> Session {
         let request = session.request("http://pt.csust.edu.cn/meol/homepage/common/sso_login.jsp")
         let response = await request.serializingString().response
@@ -185,6 +201,9 @@ public class SSOHelper {
         return session
     }
 
+    /// 获取验证码
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 验证码图片数据
     public func getCaptcha() async throws -> Data {
         let response = try await session.request(
             "https://authserver.csust.edu.cn/authserver/getCaptcha.htl"
@@ -195,6 +214,11 @@ public class SSOHelper {
         return response
     }
 
+    /// 获取短信动态码
+    /// - Parameters:
+    ///   - mobile: 用户名
+    ///   - captcha: 验证码
+    /// - Throws: `SSOHelperError`
     public func getDynamicCode(mobile: String, captcha: String) async throws {
         let url = URL(
             string: "https://authserver.csust.edu.cn/authserver/dynamicCode/getDynamicCode.htl")!
@@ -222,6 +246,12 @@ public class SSOHelper {
         }
     }
 
+    /// 短信动态码登录
+    /// - Parameters:
+    ///   - username: 用户名
+    ///   - dynamicCode: 短信动态码
+    ///   - captcha: 验证码
+    /// - Throws: `SSOHelperError`
     public func dynamicLogin(username: String, dynamicCode: String, captcha: String) async throws {
         let (loginForm, isAlreadyLoggedIn) = try await getLoginForm()
         if isAlreadyLoggedIn {
