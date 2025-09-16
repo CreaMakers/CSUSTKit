@@ -6,6 +6,10 @@ public actor CampusCardHelper {
 
     public init() {}
 
+    /// 获取指定校区的楼栋列表
+    /// - Parameter campus: 校区
+    /// - Throws: `CampusCardHelperError`
+    /// - Returns: 楼栋列表
     public func getBuildings(for campus: Campus) async throws -> [Building] {
         struct QueryElecBuilding: Codable {
             let retcode: String?
@@ -78,6 +82,12 @@ public actor CampusCardHelper {
         return buildings
     }
 
+    /// 获取指定宿舍的剩余电量
+    /// - Parameters:
+    ///   - building: 宿舍所在楼栋
+    ///   - room: 宿舍号
+    /// - Throws: `CampusCardHelperError`
+    /// - Returns: 剩余电量（单位：度）
     public func getElectricity(building: Building, room: String) async throws -> Double {
         struct QueryElecRoomInfo: Codable {
             let errmsg: String?
