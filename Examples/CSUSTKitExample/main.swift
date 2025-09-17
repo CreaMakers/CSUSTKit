@@ -11,24 +11,19 @@ func loadAccount() -> (String?, String?) {
 struct Main {
     static func main() async {
         let originalURL = "https://www.lofter.com/front/login"
-        let webVPNHelper = WebVPNHelper()
-
         do {
             print("原始 URL: \(originalURL)")
-
-            let encryptedURL = try webVPNHelper.encryptURL(originalURL: originalURL)
+            let encryptedURL = try WebVPNHelper.encryptURL(originalURL: originalURL)
             print("WebVPN URL: \(encryptedURL)")
-
-            let decryptedURL = try webVPNHelper.decryptURL(vpnURL: encryptedURL)
+            let decryptedURL = try WebVPNHelper.decryptURL(vpnURL: encryptedURL)
             print("解密后 URL: \(decryptedURL)")
-
             if decryptedURL == originalURL {
-                print("✅ 验证成功")
+                print("验证成功")
             } else {
-                print("❌ 验证失败")
+                print("验证失败")
             }
         } catch {
-            print("❌ 错误: \(error.localizedDescription)")
+            print("Error: \(error)")
         }
 
         let ssoHelper = SSOHelper()

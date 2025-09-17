@@ -3,17 +3,15 @@ import Foundation
 
 /// WebVPN 助手
 public class WebVPNHelper {
-    private let host: String = "vpn.csust.edu.cn"
-    private let key: String = "WRDvpnisthebest!"
-    private let iv: String = "WRDvpnisthebest!"
-
-    public init() {}
+    private static let host: String = "vpn.csust.edu.cn"
+    private static let key: String = "WRDvpnisthebest!"
+    private static let iv: String = "WRDvpnisthebest!"
 
     /// 将原始 URL 加密为 WebVPN URL
     /// - Parameter originalURL: 原始 URL
     /// - Throws: `WebVPNHelperError`
     /// - Returns: 加密后的 WebVPN URL
-    public func encryptURL(originalURL: String) throws -> String {
+    public static func encryptURL(originalURL: String) throws -> String {
         guard let url = URL(string: originalURL),
             let originalHost = url.host,
             let scheme = url.scheme
@@ -45,7 +43,7 @@ public class WebVPNHelper {
     /// - Parameter vpnURL: WebVPN URL
     /// - Throws: `WebVPNHelperError`
     /// - Returns: 原始 URL
-    public func decryptURL(vpnURL: String) throws -> String {
+    public static func decryptURL(vpnURL: String) throws -> String {
         guard let url = URL(string: vpnURL) else {
             throw WebVPNHelperError.urlDecryptionFailed("无效的 WebVPN URL")
         }
@@ -87,7 +85,7 @@ public class WebVPNHelper {
         return "\(scheme)://\(decryptedHost)\(originalPath)"
     }
 
-    private func encryptHost(_ text: String) throws -> String {
+    private static func encryptHost(_ text: String) throws -> String {
         guard let keyBytes = key.data(using: .utf8)?.byteArray,
             let ivBytes = iv.data(using: .utf8)?.byteArray,
             let textBytes = text.data(using: .utf8)?.byteArray
@@ -107,7 +105,7 @@ public class WebVPNHelper {
         }
     }
 
-    private func decryptHost(_ hexText: String) throws -> String {
+    private static func decryptHost(_ hexText: String) throws -> String {
         guard let keyBytes = key.data(using: .utf8)?.byteArray,
             let ivBytes = iv.data(using: .utf8)?.byteArray
         else {
@@ -136,14 +134,14 @@ public class WebVPNHelper {
         }
     }
 
-    private func textRightAppendBytes(dataBytes: [UInt8], segmentByteSize: Int = 16) -> [UInt8] {
+    private static func textRightAppendBytes(dataBytes: [UInt8], segmentByteSize: Int = 16) -> [UInt8] {
         let paddingLen = segmentByteSize - (dataBytes.count % segmentByteSize)
         if paddingLen == segmentByteSize { return dataBytes }
         let padding = [UInt8](repeating: 48, count: paddingLen)  // "0" 的 ASCII 值
         return dataBytes + padding
     }
 
-    private func textRightAppendHex(hexString: String, segmentHexSize: Int = 32) -> String {
+    private static func textRightAppendHex(hexString: String, segmentHexSize: Int = 32) -> String {
         let paddingLen = segmentHexSize - (hexString.count % segmentHexSize)
         if paddingLen == segmentHexSize { return hexString }
         return hexString + String(repeating: "0", count: paddingLen)
