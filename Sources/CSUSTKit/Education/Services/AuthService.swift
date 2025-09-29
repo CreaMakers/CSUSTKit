@@ -14,57 +14,36 @@ extension EduHelper {
             return !isLoginRequired(response: response)
         }
 
+        /// 获取登录验证码
+        /// - Returns: 登录验证码图片数据
+        public func getCaptcha() async throws -> Data {
+            return try await session.request("http://xk.csust.edu.cn/jsxsd/verifycode.servlet").serializingData().value
+        }
+
         /// 登录
         /// - Parameters:
         ///   - username: 用户名
         ///   - password: 密码
+        ///   - captcha: 验证码
         /// - Throws: `EduHelperError`
-        public func login(username: String, password: String) async throws {
-            let codeResponse = try await session.request(
-                "http://xk.csust.edu.cn/Logon.do?method=logon&flag=sess", method: .post
-            ).serializingString().value
-            guard !codeResponse.isEmpty else {
-                throw EduHelperError.loginFailed("验证码响应为空")
-            }
-
-            let params = codeResponse.components(separatedBy: "#")
-            guard params.count == 2 else {
-                throw EduHelperError.loginFailed("验证码响应格式无效")
-            }
-            var sourceCode = params[0]
-            let sequenceHint = params[1]
-            let code = "\(username)%%%\(password)"
-            var encoded = ""
-            for i in 0..<code.count {
-                if i < 20 {
-                    let charFromCode = String(code[code.index(code.startIndex, offsetBy: i)])
-                    let hintChar = sequenceHint[
-                        sequenceHint.index(sequenceHint.startIndex, offsetBy: i)]
-                    guard let n = Int(String(hintChar)) else {
-                        throw EduHelperError.loginFailed("序列提示中字符无效")
-                    }
-                    let extractedChars = String(sourceCode.prefix(n))
-                    encoded += charFromCode + extractedChars
-                    sourceCode.removeFirst(n)
-                } else {
-                    let remaining = code[code.index(code.startIndex, offsetBy: i)...]
-                    encoded += remaining
-                    break
-                }
-            }
-
+        public func login(username: String, password: String, captcha: String) async throws {
+            let encoded = "\(Data(username.utf8).base64EncodedString())%%%\(Data(password.utf8).base64EncodedString())"
             let loginParameters: [String: String] = [
                 "userAccount": username,
                 "userPassword": password,
+                "RANDOMCODE": captcha,
                 "encoded": encoded,
             ]
-            let loginResponse = try await session.request(
-                "http://xk.csust.edu.cn/Logon.do?method=logon",
+            let response = try await session.request(
+                "http://xk.csust.edu.cn/jsxsd/xk/LoginToXk",
                 method: .post,
                 parameters: loginParameters,
                 encoding: URLEncoding.default
             ).serializingString().value
-            if isLoginRequired(response: loginResponse) {
+            if response.contains("验证码错误") {
+                throw EduHelperError.loginFailed("验证码错误")
+            }
+            if isLoginRequired(response: response) {
                 throw EduHelperError.loginFailed("用户名或密码错误")
             }
         }
