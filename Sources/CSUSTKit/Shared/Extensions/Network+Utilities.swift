@@ -14,8 +14,8 @@ extension Session {
 }
 
 extension DataRequest {
-    func string() async throws -> String {
-        return try await self.serializingString().value
+    func string(_ encoding: String.Encoding? = nil) async throws -> String {
+        return try await self.serializingString(encoding: encoding).value
     }
 
     @discardableResult
