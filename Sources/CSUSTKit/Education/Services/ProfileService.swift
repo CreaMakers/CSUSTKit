@@ -8,13 +8,11 @@ extension EduHelper {
         /// - Returns: 学生档案信息
         public func getProfile() async throws -> Profile {
             let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/grxx/xsxx")
-
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#xjkpTable > tbody").first() else {
                 throw EduHelperError.profileRetrievalFailed("未找到个人信息表")
             }
             let rows = try table.select("tr")
-
             func parseTableCell(_ rows: Elements, _ rowIndex: Int, _ colIndex: Int) throws -> String {
                 guard rowIndex < rows.count else {
                     throw EduHelperError.profileRetrievalFailed("行索引越界")
@@ -26,7 +24,6 @@ extension EduHelper {
                 }
                 return try cols[colIndex].text().trim()
             }
-
             return Profile(
                 department: try parseTableCell(rows, 2, 0).components(separatedBy: "：")[1],
                 major: try parseTableCell(rows, 2, 1).components(separatedBy: "：")[1],

@@ -7,17 +7,14 @@ extension EduHelper {
         /// 检查当前登录状态
         /// - Returns: 是否已登录
         public func checkLoginStatus() async throws -> Bool {
-            let response = try await session.request(
-                "http://xk.csust.edu.cn/jsxsd/framework/xsMain.jsp"
-            ).serializingString().value
-
+            let response = try await session.request("http://xk.csust.edu.cn/jsxsd/framework/xsMain.jsp").string()
             return !isLoginRequired(response: response)
         }
 
         /// 获取登录验证码
         /// - Returns: 登录验证码图片数据
         public func getCaptcha() async throws -> Data {
-            return try await session.request("http://xk.csust.edu.cn/jsxsd/verifycode.servlet").serializingData().value
+            return try await session.request("http://xk.csust.edu.cn/jsxsd/verifycode.servlet").data()
         }
 
         /// 登录
@@ -27,19 +24,13 @@ extension EduHelper {
         ///   - captcha: 验证码
         /// - Throws: `EduHelperError`
         public func login(username: String, password: String, captcha: String) async throws {
-            let encoded = "\(Data(username.utf8).base64EncodedString())%%%\(Data(password.utf8).base64EncodedString())"
-            let loginParameters: [String: String] = [
+            let parameters: [String: String] = [
                 "userAccount": username,
                 "userPassword": password,
                 "RANDOMCODE": captcha,
-                "encoded": encoded,
+                "encoded": "\(username.base64String)%%%\(password.base64String)",
             ]
-            let response = try await session.request(
-                "http://xk.csust.edu.cn/jsxsd/xk/LoginToXk",
-                method: .post,
-                parameters: loginParameters,
-                encoding: URLEncoding.default
-            ).serializingString().value
+            let response = try await session.post("http://xk.csust.edu.cn/jsxsd/xk/LoginToXk", parameters).string()
             if response.contains("验证码错误") {
                 throw EduHelperError.loginFailed("验证码错误")
             }
@@ -50,12 +41,7 @@ extension EduHelper {
 
         /// 登出当前用户
         public func logout() async throws {
-            let timestamp = Int(Date().timeIntervalSince1970 * 1000)
-            _ = try await session.request(
-                "http://xk.csust.edu.cn/jsxsd/xk/LoginToXk?method=exit&tktime=\(timestamp)"
-            )
-            .serializingData().value
-
+            try await session.request("http://xk.csust.edu.cn/jsxsd/xk/LoginToXk?method=exit&tktime=\(Date().millisecondsSince1970)").data()
             self.session = Session()
         }
     }

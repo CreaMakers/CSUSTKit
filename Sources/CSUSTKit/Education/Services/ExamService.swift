@@ -19,15 +19,12 @@ extension EduHelper {
                 let semesters = try await getAvailableSemestersForExamSchedule()
                 queryAcademicYearSemester = semesters.1
             }
-
             let queryParams = [
                 "xqlbmc": semesterType?.rawValue ?? "",
                 "xnxqid": queryAcademicYearSemester,
                 "xqlb": semesterType?.id ?? "",
             ]
-            let response = try await performRequest(
-                "http://xk.csust.edu.cn/jsxsd/xsks/xsksap_list", .post, queryParams)
-
+            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xsks/xsksap_list", .post, queryParams)
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#dataList").first() else {
                 throw EduHelperError.examScheduleRetrievalFailed("未找到考试安排表")
@@ -35,20 +32,15 @@ extension EduHelper {
             guard !(try table.html().contains("未查询到数据")) else {
                 return []
             }
-
             let rows = try table.select("tr")
             var exams: [Exam] = []
-
             for (index, row) in rows.enumerated() {
                 guard index > 0 else { continue }
                 let cols = try row.select("td")
                 guard cols.count >= 11 else {
-                    throw EduHelperError.examScheduleRetrievalFailed(
-                        "行列数不足: \(cols.count)")
+                    throw EduHelperError.examScheduleRetrievalFailed("行列数不足: \(cols.count)")
                 }
-
                 let examTimeRange = try parseDate(from: try cols[6].text().trim())
-
                 let exam = Exam(
                     campus: try cols[1].text().trim(),
                     session: try cols[2].text().trim(),
@@ -65,7 +57,6 @@ extension EduHelper {
                 )
                 exams.append(exam)
             }
-
             return exams
         }
 
@@ -73,15 +64,11 @@ extension EduHelper {
         /// - Throws: `EduHelperError`
         /// - Returns: 包含所有可用学期的数组和默认学期
         public func getAvailableSemestersForExamSchedule() async throws -> ([String], String) {
-            let response = try await performRequest(
-                "http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
-
+            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
             let document = try SwiftSoup.parse(response)
             guard let semesterSelect = try document.select("#xnxqid").first() else {
-                throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed(
-                    "未找到学期选择元素")
+                throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed("未找到学期选择元素")
             }
-
             let options = try semesterSelect.select("option")
             var semesters: [String] = []
             var defaultSemester: String?
@@ -92,17 +79,12 @@ extension EduHelper {
                 }
                 semesters.append(name)
             }
-
             guard !semesters.isEmpty else {
-                throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed(
-                    "学期选择元素中未找到学期")
+                throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed("学期选择元素中未找到学期")
             }
-
             guard let defaultSemester = defaultSemester else {
-                throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed(
-                    "未找到默认学期")
+                throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed("未找到默认学期")
             }
-
             return (semesters, defaultSemester)
         }
 
@@ -120,19 +102,13 @@ extension EduHelper {
                 throw EduHelperError.dateParsingFailed("日期字符串格式无效: \(dateString)")
             }
             let timeComponents = components[1].split(separator: "~")
-
             guard timeComponents.count == 2 else {
-                throw EduHelperError.dateParsingFailed(
-                    "日期字符串中的时间格式无效: \(dateString)")
+                throw EduHelperError.dateParsingFailed("日期字符串中的时间格式无效: \(dateString)")
             }
-
-            guard
-                let startDate = Self.dateFormatter.date(
-                    from: "\(components[0]) \(timeComponents[0])"),
+            guard let startDate = Self.dateFormatter.date(from: "\(components[0]) \(timeComponents[0])"),
                 let endDate = Self.dateFormatter.date(from: "\(components[0]) \(timeComponents[1])")
             else {
-                throw EduHelperError.dateParsingFailed(
-                    "无法从字符串解析日期: \(dateString)")
+                throw EduHelperError.dateParsingFailed("无法从字符串解析日期: \(dateString)")
             }
             return (startDate, endDate)
         }

@@ -26,8 +26,7 @@ public class EduHelper {
             for cookie in cookies {
                 configuration.httpCookieStorage?.setCookie(cookie)
             }
-            self.session = Session(
-                configuration: configuration, interceptor: interceptor)
+            self.session = Session(configuration: configuration, interceptor: interceptor)
         } else {
             self.session = Session(interceptor: interceptor)
         }
