@@ -1,6 +1,6 @@
 extension MoocHelper {
     /// 个人资料
-    public struct Profile: Sendable {
+    public struct Profile: BaseModel {
         /// 姓名
         public let name: String
         /// 最后登录时间

@@ -1,6 +1,6 @@
 extension CampusCardHelper {
     /// 校区
-    public enum Campus: String, Sendable, CaseIterable {
+    public enum Campus: String, CaseIterable, BaseModel {
         /// 云塘
         case yuntang = "云塘"
         /// 金盆岭

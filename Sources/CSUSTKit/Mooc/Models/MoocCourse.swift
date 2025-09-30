@@ -1,6 +1,6 @@
 extension MoocHelper {
     /// 课程信息
-    public struct Course: Sendable, Hashable, Codable {
+    public struct Course: BaseModel {
         /// 课程ID
         public let id: String
         /// 课程编号

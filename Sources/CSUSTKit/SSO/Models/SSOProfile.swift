@@ -1,6 +1,6 @@
 extension SSOHelper {
     /// 用户信息
-    public struct Profile: Codable, Sendable {
+    public struct Profile: BaseModel {
         /// 学生类别
         public let categoryName: String
         /// 学号

@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 学生档案信息
-    public struct Profile: Sendable {
+    public struct Profile: BaseModel {
         /// 院系
         public let department: String
         /// 专业

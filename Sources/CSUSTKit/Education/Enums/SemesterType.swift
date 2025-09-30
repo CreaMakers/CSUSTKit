@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 学期类型
-    public enum SemesterType: String, CaseIterable {
+    public enum SemesterType: String, CaseIterable, BaseModel {
         /// 期初
         case beginning = "期初"
         /// 期中

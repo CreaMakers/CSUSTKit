@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 课表课程信息
-    public struct Course: Sendable, Codable {
+    public struct Course: BaseModel {
         /// 课程名称
         public let courseName: String
         /// 课程分组名称

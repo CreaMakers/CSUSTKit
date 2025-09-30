@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 修读方式
-    public enum StudyMode: String, CaseIterable {
+    public enum StudyMode: String, CaseIterable, BaseModel {
         /// 主修
         case major = "主修"
         /// 辅修

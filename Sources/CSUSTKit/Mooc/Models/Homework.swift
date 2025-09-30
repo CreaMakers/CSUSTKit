@@ -1,6 +1,6 @@
 extension MoocHelper {
     /// 课程作业
-    public struct Homework: Sendable, Codable {
+    public struct Homework: BaseModel {
         /// 作业ID
         public let id: Int
         /// 作业标题

@@ -2,7 +2,7 @@ import Foundation
 
 extension EduHelper {
     /// 考试信息
-    public struct Exam: Sendable, Codable {
+    public struct Exam: BaseModel {
         /// 校区
         public let campus: String
         /// 考试场次

@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 课程成绩信息
-    public struct CourseGrade: Sendable, Codable {
+    public struct CourseGrade: BaseModel {
         /// 开课学期
         public let semester: String
         /// 课程编号

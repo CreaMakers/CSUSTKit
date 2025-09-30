@@ -1,6 +1,6 @@
 extension EduHelper {
     /// 每周的日期
-    public enum DayOfWeek: Int, Sendable, CaseIterable, Codable {
+    public enum DayOfWeek: Int, CaseIterable, BaseModel {
         /// 星期日
         case sunday = 0
         /// 星期一

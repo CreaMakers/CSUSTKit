@@ -1,6 +1,6 @@
 extension CampusCardHelper {
     /// 宿舍楼栋
-    public struct Building: Sendable {
+    public struct Building: BaseModel {
         /// 宿舍楼栋名称
         public let name: String
         /// 宿舍楼栋ID
