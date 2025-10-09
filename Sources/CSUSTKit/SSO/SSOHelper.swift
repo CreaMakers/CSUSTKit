@@ -25,12 +25,13 @@ public class SSOHelper {
         let time: Int?
     }
 
-    private var session: Session = Session()
+    private var session: Session
     private let cookieStorage: CookieStorage?
     private let interceptor = EduHelper.EduRequestInterceptor(maxRetryCount: 5)
 
-    public init(cookieStorage: CookieStorage? = nil) {
+    public init(cookieStorage: CookieStorage? = nil, session: Session = Session()) {
         self.cookieStorage = cookieStorage
+        self.session = session
         restoreCookies()
     }
 
