@@ -32,7 +32,6 @@ public class SSOHelper {
     public init(cookieStorage: CookieStorage? = nil, session: Session = Session()) {
         self.cookieStorage = cookieStorage
         self.session = session
-        restoreCookies()
     }
 
     public func saveCookies() {
