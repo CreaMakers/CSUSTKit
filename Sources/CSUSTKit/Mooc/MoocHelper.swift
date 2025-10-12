@@ -1,4 +1,5 @@
 import Alamofire
+import Foundation
 import SwiftSoup
 
 /// 网络课程中心助手
@@ -165,15 +166,33 @@ public class MoocHelper {
         guard let reminderElement = try document.getElementById("reminder") else {
             throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("未找到提醒区域")
         }
-        guard let courseNamesContainer = try reminderElement.getElementsByTag("li").first() else {
-            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("未找到任何提醒")
+        let homeworkListElement = reminderElement.children()
+            .first(where: { (element: Element) -> Bool in
+                guard let linkText = try? element.select("a").first()?.ownText() else {
+                    return false
+                }
+                return linkText.contains("待提交作业")
+            })
+
+        guard let courseNamesContainer = homeworkListElement else {
+            return []
         }
-        let courseNameElements = try courseNamesContainer.select("li > ul > li > a")
+
+        let courseNameElements = try courseNamesContainer.select("ul > li > a")
+        if courseNameElements.isEmpty() {
+            return []
+        }
+
         var courseNames: [(name: String, id: String)] = []
         for courseNameElement in courseNameElements {
-            let id = (try courseNameElement.attr("onclick"))
-                .replacingOccurrences(of: "window.open('./lesson/enter_course.jsp?lid=", with: "")
-                .replacingOccurrences(of: "&t=hw','manage_course')", with: "")
+            let onclickAttr = try courseNameElement.attr("onclick")
+            let regex = try NSRegularExpression(pattern: "lid=(\\d+)")
+            guard let match = regex.firstMatch(in: onclickAttr, range: NSRange(onclickAttr.startIndex..., in: onclickAttr)),
+                let range = Range(match.range(at: 1), in: onclickAttr)
+            else {
+                continue
+            }
+            let id = String(onclickAttr[range])
             let courseName = try courseNameElement.text().trim()
             courseNames.append((name: courseName, id: id))
         }
