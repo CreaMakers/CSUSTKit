@@ -46,6 +46,10 @@ public class SSOHelper {
         cookieStorage?.clearCookies()
     }
 
+    public func getSession() -> Session {
+        session
+    }
+
     private func checkNeedCaptcha(username: String) async throws -> Bool {
         let timestamp = Date().millisecondsSince1970
         let response = try await session.request("https://authserver.csust.edu.cn/authserver/checkNeedCaptcha.htl?username=\(username)&_=\(timestamp)").decodable(CheckResponse.self)
