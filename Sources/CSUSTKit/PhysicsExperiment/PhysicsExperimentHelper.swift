@@ -79,4 +79,49 @@ public class PhysicsExperimentHelper {
 
         return courses
     }
+
+    public func getCourseGrades() async throws -> [CourseGrade] {
+        let response = try await session.request("http://10.255.65.52/Student/GeneralCourseScore.aspx").string()
+
+        let document = try SwiftSoup.parse(response)
+        guard let table = try document.getElementById("gvList") else {
+            throw PhysicsExperimentError.courseGradesRetrievalFailed("未找到成绩表格")
+        }
+
+        let rows = try table.getElementsByTag("tr")
+        guard rows.count >= 1 else {
+            throw PhysicsExperimentError.courseGradesRetrievalFailed("成绩表格格式无效")
+        }
+
+        var courseGrades: [CourseGrade] = []
+        for (index, row) in rows.enumerated() {
+            guard index > 0 else { continue }
+
+            let cols = try row.getElementsByTag("td")
+            guard cols.count >= 7 else {
+                throw PhysicsExperimentError.courseGradesRetrievalFailed("成绩表格列数不足")
+            }
+
+            let courseCode = try cols[0].text().trim()
+            let courseName = try cols[1].text().trim()
+            let itemName = try cols[2].text().trim()
+            let previewGrade = try cols[3].text().trim()
+            let operationGrade = try cols[4].text().trim()
+            let reportGrade = try cols[5].text().trim()
+            let totalGrade = try cols[6].text().trim()
+
+            let grade = CourseGrade(
+                courseCode: courseCode,
+                courseName: courseName,
+                itemName: itemName,
+                previewGrade: previewGrade,
+                operationGrade: operationGrade,
+                reportGrade: reportGrade,
+                totalGrade: totalGrade
+            )
+            courseGrades.append(grade)
+        }
+
+        return courseGrades
+    }
 }
