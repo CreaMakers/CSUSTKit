@@ -1,4 +1,5 @@
 import Alamofire
+import Foundation
 import SwiftSoup
 
 /// 物理实验教学管理助手
@@ -42,6 +43,9 @@ public class PhysicsExperimentHelper {
             throw PhysicsExperimentError.schedulesRetrievalFailed("课程表格式无效")
         }
 
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+
         var courses: [Course] = []
         for (index, row) in rows.enumerated() {
             guard index > 0 else { continue }
@@ -58,11 +62,14 @@ public class PhysicsExperimentHelper {
             let batch = try cols[2].text().trim()
             let teacher = try cols[3].text().trim()
             let location = try cols[4].text().trim()
-            let time = try cols[5].text().trim()
+            let timeString = try cols[5].text().trim()
             guard let classHours = Int(try cols[6].text().trim()) else {
                 throw PhysicsExperimentError.schedulesRetrievalFailed("课时格式无效")
             }
-            let weekInfo = try cols[7].text().trim()
+            let weekInfoString = try cols[7].text().trim()
+
+            let (startTime, endTime) = try parseTime(timeString, with: dateFormatter)
+            let (week, dayOfWeek) = try parseWeekInfo(weekInfoString)
 
             let course = Course(
                 id: id,
@@ -70,9 +77,11 @@ public class PhysicsExperimentHelper {
                 batch: batch,
                 teacher: teacher,
                 location: location,
-                time: time,
+                startTime: startTime,
+                endTime: endTime,
                 classHours: classHours,
-                weekInfo: weekInfo
+                week: week,
+                dayOfWeek: dayOfWeek
             )
             courses.append(course)
         }
@@ -80,6 +89,68 @@ public class PhysicsExperimentHelper {
         return courses
     }
 
+    /// 解析时间字符串 (例如 "2025-12-02 07:45 - 10:00")
+    private func parseTime(_ timeString: String, with formatter: DateFormatter) throws -> (startTime: Date, endTime: Date) {
+        let components = timeString.components(separatedBy: " - ")
+        guard components.count == 2,
+            let dateTimePart = components.first,
+            let endTimePart = components.last
+        else {
+            throw PhysicsExperimentError.schedulesRetrievalFailed("时间格式无效: \(timeString)")
+        }
+
+        guard let datePart = dateTimePart.components(separatedBy: " ").first else {
+            throw PhysicsExperimentError.schedulesRetrievalFailed("无法从时间中提取日期部分: \(timeString)")
+        }
+
+        let fullStartString = dateTimePart
+        let fullEndString = "\(datePart) \(endTimePart)"
+
+        guard let startTime = formatter.date(from: fullStartString),
+            let endTime = formatter.date(from: fullEndString)
+        else {
+            throw PhysicsExperimentError.schedulesRetrievalFailed("日期字符串转换失败: \(timeString)")
+        }
+
+        return (startTime, endTime)
+    }
+
+    /// 解析周次和星期信息 (例如 "第13周 星期二")
+    private func parseWeekInfo(_ weekInfoString: String) throws -> (week: Int, dayOfWeek: EduHelper.DayOfWeek) {
+        let components = weekInfoString.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        guard components.count == 2,
+            let weekPart = components.first,
+            let dayPart = components.last
+        else {
+            throw PhysicsExperimentError.schedulesRetrievalFailed("周信息格式无效: \(weekInfoString)")
+        }
+
+        // 解析周数
+        let weekString = weekPart.replacingOccurrences(of: "第", with: "").replacingOccurrences(of: "周", with: "")
+        guard let week = Int(weekString) else {
+            throw PhysicsExperimentError.schedulesRetrievalFailed("无法解析周次: \(weekPart)")
+        }
+
+        // 解析星期
+        let dayOfWeek: EduHelper.DayOfWeek
+        switch dayPart {
+        case "星期一": dayOfWeek = .monday
+        case "星期二": dayOfWeek = .tuesday
+        case "星期三": dayOfWeek = .wednesday
+        case "星期四": dayOfWeek = .thursday
+        case "星期五": dayOfWeek = .friday
+        case "星期六": dayOfWeek = .saturday
+        case "星期日": dayOfWeek = .sunday
+        default:
+            throw PhysicsExperimentError.schedulesRetrievalFailed("无法解析星期: \(dayPart)")
+        }
+
+        return (week, dayOfWeek)
+    }
+
+    /// 获取物理实验课程成绩
+    /// - Throws: `PhysicsExperimentError`
+    /// - Returns: 课程成绩列表
     public func getCourseGrades() async throws -> [CourseGrade] {
         let response = try await session.request("http://10.255.65.52/Student/GeneralCourseScore.aspx").string()
 
@@ -105,10 +176,12 @@ public class PhysicsExperimentHelper {
             let courseCode = try cols[0].text().trim()
             let courseName = try cols[1].text().trim()
             let itemName = try cols[2].text().trim()
-            let previewGrade = try cols[3].text().trim()
-            let operationGrade = try cols[4].text().trim()
-            let reportGrade = try cols[5].text().trim()
-            let totalGrade = try cols[6].text().trim()
+            let previewGrade = Int(try cols[3].text().trim())
+            let operationGrade = Int(try cols[4].text().trim())
+            let reportGrade = Int(try cols[5].text().trim())
+            guard let totalGrade = Int(try cols[6].text().trim()) else {
+                throw PhysicsExperimentError.courseGradesRetrievalFailed("总成绩格式无效")
+            }
 
             let grade = CourseGrade(
                 courseCode: courseCode,

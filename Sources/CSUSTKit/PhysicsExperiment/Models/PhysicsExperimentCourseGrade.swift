@@ -8,22 +8,22 @@ extension PhysicsExperimentHelper {
         /// 项目名称
         public let itemName: String
         /// 预习成绩
-        public let previewGrade: String
+        public let previewGrade: Int?
         /// 操作成绩
-        public let operationGrade: String
+        public let operationGrade: Int?
         /// 报告成绩
-        public let reportGrade: String
+        public let reportGrade: Int?
         /// 总成绩
-        public let totalGrade: String
+        public let totalGrade: Int
 
         public init(
             courseCode: String,
             courseName: String,
             itemName: String,
-            previewGrade: String,
-            operationGrade: String,
-            reportGrade: String,
-            totalGrade: String
+            previewGrade: Int?,
+            operationGrade: Int?,
+            reportGrade: Int?,
+            totalGrade: Int
         ) {
             self.courseCode = courseCode
             self.courseName = courseName

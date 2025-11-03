@@ -1,3 +1,5 @@
+import Foundation
+
 extension PhysicsExperimentHelper {
     /// 物理实验课程信息
     public struct Course: BaseModel {
@@ -11,12 +13,16 @@ extension PhysicsExperimentHelper {
         public let teacher: String
         /// 上课地址
         public let location: String
-        /// 上课时间
-        public let time: String
+        /// 上课开始时间
+        public let startTime: Date
+        /// 上课结束时间
+        public let endTime: Date
         /// 课时
         public let classHours: Int
-        /// 星期
-        public let weekInfo: String
+        /// 周次
+        public let week: Int
+        /// 每周日期
+        public let dayOfWeek: EduHelper.DayOfWeek
 
         public init(
             id: Int,
@@ -24,18 +30,22 @@ extension PhysicsExperimentHelper {
             batch: String,
             teacher: String,
             location: String,
-            time: String,
+            startTime: Date,
+            endTime: Date,
             classHours: Int,
-            weekInfo: String
+            week: Int,
+            dayOfWeek: EduHelper.DayOfWeek
         ) {
             self.id = id
             self.name = name
             self.batch = batch
             self.teacher = teacher
             self.location = location
-            self.time = time
+            self.startTime = startTime
+            self.endTime = endTime
             self.classHours = classHours
-            self.weekInfo = weekInfo
+            self.week = week
+            self.dayOfWeek = dayOfWeek
         }
     }
 }
