@@ -6,8 +6,9 @@
       "args": [],
       "cwd": "${workspaceFolder:CSUSTKit}",
       "name": "Debug CSUSTKitExample",
-      "program": "${workspaceFolder:CSUSTKit}/.build/debug/CSUSTKitExample",
-      "preLaunchTask": "swift: Build Debug CSUSTKitExample"
+      "preLaunchTask": "swift: Build Debug CSUSTKitExample",
+      "target": "CSUSTKitExample",
+      "configuration": "debug"
     },
     {
       "type": "swift",
@@ -15,8 +16,9 @@
       "args": [],
       "cwd": "${workspaceFolder:CSUSTKit}",
       "name": "Release CSUSTKitExample",
-      "program": "${workspaceFolder:CSUSTKit}/.build/release/CSUSTKitExample",
-      "preLaunchTask": "swift: Build Release CSUSTKitExample"
+      "preLaunchTask": "swift: Build Release CSUSTKitExample",
+      "target": "CSUSTKitExample",
+      "configuration": "release"
     }
   ]
 }
