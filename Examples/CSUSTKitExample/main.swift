@@ -2,9 +2,14 @@ import CSUSTKit
 import DotEnvy
 import Foundation
 
-func loadAccount() -> (String?, String?) {
+func loadAuthServerAccount() -> (String?, String?) {
     let environment = try? DotEnvironment.make()
-    return (environment?["CSUST_USERNAME"], environment?["CSUST_PASSWORD"])
+    return (environment?["CSUST_AUTHSERVER_USERNAME"], environment?["CSUST_AUTHSERVER_PASSWORD"])
+}
+
+func loadPhysicsExperimentAccount() -> (String?, String?) {
+    let environment = try? DotEnvironment.make()
+    return (environment?["CSUST_PHYSICS_EXPERIMENT_USERNAME"], environment?["CSUST_PHYSICS_EXPERIMENT_PASSWORD"])
 }
 
 @main
@@ -28,7 +33,7 @@ struct Main {
 
         let ssoHelper = SSOHelper()
         do {
-            let (username, password) = loadAccount()
+            let (username, password) = loadAuthServerAccount()
             guard let username = username, let password = password else {
                 print("Username or password not found in environment variables.")
                 return
@@ -53,6 +58,23 @@ struct Main {
             debugPrint(try await eduHelper.courseService.getCourseSchedule())
 
             try await ssoHelper.logout()
+        } catch {
+            print("Error: \(error)")
+        }
+
+        let physicsExperimentHelper = PhysicsExperimentHelper()
+        do {
+            let (username, password) = loadPhysicsExperimentAccount()
+            guard let username = username, let password = password else {
+                print("Username or password not found in environment variables.")
+                return
+            }
+
+            try await physicsExperimentHelper.login(username: username, password: password)
+            let courseSchedules = try await physicsExperimentHelper.getCourses()
+            for course in courseSchedules {
+                debugPrint(course)
+            }
         } catch {
             print("Error: \(error)")
         }
