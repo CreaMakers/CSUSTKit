@@ -32,6 +32,9 @@ public class PhysicsExperimentHelper {
     /// - Returns: 课程列表
     public func getCourses() async throws -> [Course] {
         let response = try await session.request("http://10.255.65.52/Student/myalltasklist.aspx?generalCourseId=2&generalCourseName=%E5%A4%A7%E5%AD%A6%E7%89%A9%E7%90%86%E5%AE%9E%E9%AA%8C").string()
+        guard !isLoginRequired(response: response) else {
+            throw PhysicsExperimentError.notLoggedIn("未登录或登录已过期，请重新登录")
+        }
 
         let document = try SwiftSoup.parse(response)
         guard let table = try document.getElementsByClass("msgtable").first() else {
@@ -153,6 +156,9 @@ public class PhysicsExperimentHelper {
     /// - Returns: 课程成绩列表
     public func getCourseGrades() async throws -> [CourseGrade] {
         let response = try await session.request("http://10.255.65.52/Student/GeneralCourseScore.aspx").string()
+        guard !isLoginRequired(response: response) else {
+            throw PhysicsExperimentError.notLoggedIn("未登录或登录已过期，请重新登录")
+        }
 
         let document = try SwiftSoup.parse(response)
         guard let table = try document.getElementById("gvList") else {
@@ -196,5 +202,15 @@ public class PhysicsExperimentHelper {
         }
 
         return courseGrades
+    }
+
+    internal func isLoginRequired(response: String) -> Bool {
+        return response.contains("name=\"txtUserName\"")
+    }
+
+    /// 登出当前账号
+    public func logout() async throws {
+        try await session.request("http://10.255.65.52/logout.aspx").data()
+        session = Session()
     }
 }

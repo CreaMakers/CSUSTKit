@@ -8,6 +8,8 @@ extension PhysicsExperimentHelper {
         case schedulesRetrievalFailed(String)
         /// 获取课程成绩失败
         case courseGradesRetrievalFailed(String)
+        /// 未登录
+        case notLoggedIn(String)
 
         /// 错误描述
         public var errorDescription: String? {
@@ -18,6 +20,8 @@ extension PhysicsExperimentHelper {
                 return "获取课程表失败: \(message)"
             case .courseGradesRetrievalFailed(let message):
                 return "获取课程成绩失败: \(message)"
+            case .notLoggedIn(let message):
+                return "登录状态错误: \(message)"
             }
         }
     }

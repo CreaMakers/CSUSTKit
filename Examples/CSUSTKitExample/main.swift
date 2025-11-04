@@ -72,15 +72,10 @@ struct Main {
 
             try await physicsExperimentHelper.login(username: username, password: password)
 
-            let courseSchedules = try await physicsExperimentHelper.getCourses()
-            for course in courseSchedules {
-                debugPrint(course)
-            }
+            debugPrint(try await physicsExperimentHelper.getCourses())
+            debugPrint(try await physicsExperimentHelper.getCourseGrades())
 
-            let courseGrades = try await physicsExperimentHelper.getCourseGrades()
-            for grade in courseGrades {
-                debugPrint(grade)
-            }
+            try await physicsExperimentHelper.logout()
         } catch {
             print("Error: \(error)")
         }
