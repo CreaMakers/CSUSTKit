@@ -4,7 +4,8 @@ import SwiftSoup
 
 /// 教务助手
 public class EduHelper {
-    var session: Session
+    private let mode: ConnectionMode
+    private var session: Session
 
     /// 认证服务
     public let authService: AuthService
@@ -17,7 +18,8 @@ public class EduHelper {
     /// 学期服务
     public let semesterService: SemesterService
 
-    public init(session: Session? = nil) {
+    public init(mode: ConnectionMode = .direct, session: Session? = nil) {
+        self.mode = mode
         let interceptor = EduRequestInterceptor(maxRetryCount: 5)
         if let baseSession = session {
             let cookies = baseSession.sessionConfiguration.httpCookieStorage?.cookies ?? []
@@ -31,10 +33,10 @@ public class EduHelper {
             self.session = Session(interceptor: interceptor)
         }
 
-        authService = AuthService(session: self.session)
-        courseService = CourseService(session: self.session)
-        examService = ExamService(session: self.session)
-        profileService = ProfileService(session: self.session)
-        semesterService = SemesterService(session: self.session)
+        authService = AuthService(mode: self.mode, session: self.session)
+        courseService = CourseService(mode: self.mode, session: self.session)
+        examService = ExamService(mode: self.mode, session: self.session)
+        profileService = ProfileService(mode: self.mode, session: self.session)
+        semesterService = SemesterService(mode: self.mode, session: self.session)
     }
 }

@@ -153,8 +153,8 @@ public class SSOHelper {
     /// - Throws: `SSOHelperError`
     /// - Returns: 教务系统的会话信息
     public func loginToEducation() async throws -> Session {
-        try await session.request("http://xk.csust.edu.cn/sso.jsp", interceptor: interceptor).data()
-        let response = try await session.request("https://authserver.csust.edu.cn/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp", interceptor: interceptor).string()
+        try await session.request(factory.make(.education, "/sso.jsp"), interceptor: interceptor).data()
+        let response = try await session.request(factory.make(.authServer, "/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp"), interceptor: interceptor).string()
         guard !response.contains("请输入账号") else {
             throw SSOHelperError.loginToEducationFailed("教务登录失败")
         }

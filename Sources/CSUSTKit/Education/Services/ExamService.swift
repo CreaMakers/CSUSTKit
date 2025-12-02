@@ -24,7 +24,7 @@ extension EduHelper {
                 "xnxqid": queryAcademicYearSemester,
                 "xqlb": semesterType?.id ?? "",
             ]
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xsks/xsksap_list", .post, queryParams)
+            let response = try await performRequest(factory.make(.education, "/jsxsd/xsks/xsksap_list"), .post, queryParams)
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#dataList").first() else {
                 throw EduHelperError.examScheduleRetrievalFailed("未找到考试安排表")
@@ -64,7 +64,7 @@ extension EduHelper {
         /// - Throws: `EduHelperError`
         /// - Returns: 包含所有可用学期的数组和默认学期
         public func getAvailableSemestersForExamSchedule() async throws -> ([String], String) {
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xsks/xsksap_query")
+            let response = try await performRequest(factory.make(.education, "/jsxsd/xsks/xsksap_query"))
             let document = try SwiftSoup.parse(response)
             guard let semesterSelect = try document.select("#xnxqid").first() else {
                 throw EduHelperError.availableSemestersForExamScheduleRetrievalFailed("未找到学期选择元素")

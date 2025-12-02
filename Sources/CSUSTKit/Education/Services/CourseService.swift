@@ -22,7 +22,7 @@ extension EduHelper {
                 "xsfs": displayMode.id,
                 "fxkc": studyMode.id,
             ]
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_list", .post, queryParams)
+            let response = try await performRequest(factory.make(.education, "/jsxsd/kscj/cjcx_list"), .post, queryParams)
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#dataList").first() else {
                 throw EduHelperError.courseGradesRetrievalFailed("未找到课程成绩表格")
@@ -50,10 +50,19 @@ extension EduHelper {
                 guard var gradeDetailUrl = gradeDetailUrl else {
                     throw EduHelperError.courseGradesRetrievalFailed("未找到成绩详情URL")
                 }
-                gradeDetailUrl =
-                    gradeDetailUrl
-                    .replacingOccurrences(of: "javascript:openWindow('", with: "http://xk.csust.edu.cn")
-                    .replacingOccurrences(of: "',700,500)", with: "")
+
+                if mode == .webVpn {
+                    gradeDetailUrl =
+                        gradeDetailUrl
+                        .replacingOccurrences(of: "javascript:this.top.vpn_inject_scripts_window(this);vpn_eval((function () { openWindow(\'/", with: factory.make(.education, "/"))
+                        .replacingOccurrences(of: "\',700,500) }).toString().slice(14, -2))", with: "")
+                } else {
+                    gradeDetailUrl =
+                        gradeDetailUrl
+                        .replacingOccurrences(of: "javascript:openWindow('", with: "http://xk.csust.edu.cn")
+                        .replacingOccurrences(of: "',700,500)", with: "")
+                }
+
                 let studyMode = try cols[6].text().trim()
                 let gradeIdentifier = try cols[7].text().trim()
                 let creditString = try cols[8].text().trim()
@@ -105,7 +114,7 @@ extension EduHelper {
         /// - Throws: `EduHelperError`
         /// - Returns: 包含所有可用学期的数组
         public func getAvailableSemestersForCourseGrades() async throws -> [String] {
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/kscj/cjcx_query")
+            let response = try await performRequest(factory.make(.education, "/jsxsd/kscj/cjcx_query"))
             let document = try SwiftSoup.parse(response)
             guard let semesterSelect = try document.select("#kksj").first() else {
                 throw EduHelperError.availableSemestersForCourseGradesRetrievalFailed("未找到学期选择元素")
@@ -293,7 +302,7 @@ extension EduHelper {
         /// - Returns: 课程信息数组
         public func getCourseSchedule(academicYearSemester: String? = nil) async throws -> [Course] {
             let queryParams: [String: String] = ["xnxq01id": academicYearSemester ?? ""]
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do", .post, queryParams)
+            let response = try await performRequest(factory.make(.education, "/jsxsd/xskb/xskb_list.do"), .post, queryParams)
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#kbtable").first() else {
                 throw EduHelperError.courseScheduleRetrievalFailed("未找到课程表")
@@ -341,7 +350,7 @@ extension EduHelper {
         /// - Throws: `EduHelperError`
         /// - Returns: 包含所有可用学期的数组和默认学期
         public func getAvailableSemestersForCourseSchedule() async throws -> ([String], String) {
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/xskb/xskb_list.do")
+            let response = try await performRequest(factory.make(.education, "/jsxsd/xskb/xskb_list.do"))
             let document = try SwiftSoup.parse(response)
             guard let semesterSelect = try document.select("#xnxq01id").first() else {
                 throw EduHelperError.availableSemestersForCourseScheduleRetrievalFailed("未找到学期选择元素")

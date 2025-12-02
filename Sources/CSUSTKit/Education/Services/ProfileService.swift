@@ -19,7 +19,7 @@ extension EduHelper {
         /// - Throws: `EduHelperError`
         /// - Returns: 学生档案信息
         public func getProfile() async throws -> Profile {
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/grxx/xsxx")
+            let response = try await performRequest(factory.make(.education, "/jsxsd/grxx/xsxx"))
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#xjkpTable > tbody").first() else {
                 throw EduHelperError.profileRetrievalFailed("未找到个人信息表")

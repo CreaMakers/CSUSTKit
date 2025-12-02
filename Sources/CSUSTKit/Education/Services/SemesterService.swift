@@ -12,7 +12,7 @@ extension EduHelper {
             let queryParams = [
                 "xnxq01id": academicYearSemester ?? ""
             ]
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/jxzl/jxzl_query", .post, queryParams)
+            let response = try await performRequest(factory.make(.education, "/jsxsd/jxzl/jxzl_query"), .post, queryParams)
             let document = try SwiftSoup.parse(response)
             guard let table = try document.select("#kbtable").first() else {
                 throw EduHelperError.semesterStartDateRetrievalFailed("未找到学期首日表")
@@ -39,7 +39,7 @@ extension EduHelper {
         /// - Throws: `EduHelperError`
         /// - Returns: 包含所有可用学期的数组和默认学期
         public func getAvailableSemestersForStartDate() async throws -> ([String], String) {
-            let response = try await performRequest("http://xk.csust.edu.cn/jsxsd/jxzl/jxzl_query")
+            let response = try await performRequest(factory.make(.education, "/jsxsd/jxzl/jxzl_query"))
             let document = try SwiftSoup.parse(response)
             guard let select = try document.select("#xnxq01id").first() else {
                 throw EduHelperError.availableSemestersForStartDateRetrievalFailed("未找到学期选择元素")

@@ -7,14 +7,14 @@ extension EduHelper {
         /// 检查当前登录状态
         /// - Returns: 是否已登录
         public func checkLoginStatus() async throws -> Bool {
-            let response = try await session.request("http://xk.csust.edu.cn/jsxsd/framework/xsMain.jsp").string()
+            let response = try await session.request(factory.make(.education, "/jsxsd/framework/xsMain.jsp")).string()
             return !isLoginRequired(response: response)
         }
 
         /// 获取登录验证码
         /// - Returns: 登录验证码图片数据
         public func getCaptcha() async throws -> Data {
-            return try await session.request("http://xk.csust.edu.cn/jsxsd/verifycode.servlet").data()
+            return try await session.request(factory.make(.education, "/jsxsd/verifycode.servlet")).data()
         }
 
         /// 登录
@@ -30,7 +30,7 @@ extension EduHelper {
                 "RANDOMCODE": captcha,
                 "encoded": "\(username.base64String)%%%\(password.base64String)",
             ]
-            let response = try await session.post("http://xk.csust.edu.cn/jsxsd/xk/LoginToXk", parameters).string()
+            let response = try await session.post(factory.make(.education, "/jsxsd/xk/LoginToXk"), parameters).string()
             if response.contains("验证码错误") {
                 throw EduHelperError.loginFailed("验证码错误")
             }
@@ -41,7 +41,7 @@ extension EduHelper {
 
         /// 登出当前用户
         public func logout() async throws {
-            try await session.request("http://xk.csust.edu.cn/jsxsd/xk/LoginToXk?method=exit&tktime=\(Date().millisecondsSince1970)").data()
+            try await session.request(factory.make(.education, "/jsxsd/xk/LoginToXk?method=exit&tktime=\(Date().millisecondsSince1970)")).data()
             self.session = Session()
         }
     }

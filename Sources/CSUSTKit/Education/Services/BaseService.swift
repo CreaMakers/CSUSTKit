@@ -2,9 +2,13 @@ import Alamofire
 
 extension EduHelper {
     public class BaseService {
-        var session: Session
+        internal let mode: ConnectionMode
+        internal let factory: URLFactory
+        internal var session: Session
 
-        init(session: Session) {
+        init(mode: ConnectionMode, session: Session) {
+            self.mode = mode
+            self.factory = URLFactory(mode: mode)
             self.session = session
         }
 
