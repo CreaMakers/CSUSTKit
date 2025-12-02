@@ -31,7 +31,7 @@ struct Main {
             print("Error: \(error)")
         }
 
-        let ssoHelper = SSOHelper()
+        let ssoHelper = SSOHelper(mode: .webVpn)
         do {
             let (username, password) = loadAuthServerAccount()
             guard let username = username, let password = password else {
@@ -43,15 +43,14 @@ struct Main {
 
             debugPrint(try await ssoHelper.getLoginUser())
 
-            let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
-            let eduHelper = EduHelper(session: try await ssoHelper.loginToEducation())
-
+            let moocHelper = MoocHelper(mode: .webVpn, session: try await ssoHelper.loginToMooc())
             debugPrint(try await moocHelper.getProfile())
             debugPrint(try await moocHelper.getCourses())
             debugPrint(try await moocHelper.getCourseHomeworks(courseId: "69571"))
-            debugPrint(try await moocHelper.getCourseTests(courseId: "66392"))
+            debugPrint(try await moocHelper.getCourseTests(courseId: "69571"))
             debugPrint(try await moocHelper.getCourseNamesWithPendingHomeworks())
 
+            let eduHelper = EduHelper(mode: .webVpn, session: try await ssoHelper.loginToEducation())
             debugPrint(try await eduHelper.profileService.getProfile())
             debugPrint(try await eduHelper.examService.getExamSchedule())
             debugPrint(try await eduHelper.courseService.getCourseGrades())
