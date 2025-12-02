@@ -25,13 +25,17 @@ public class SSOHelper {
         let time: Int?
     }
 
+    private let mode: ConnectionMode
     private var session: Session
+    private let factory: URLFactory
     private let cookieStorage: CookieStorage?
     private let interceptor = EduHelper.EduRequestInterceptor(maxRetryCount: 5)
 
-    public init(cookieStorage: CookieStorage? = nil, session: Session = Session()) {
+    public init(mode: ConnectionMode = .direct, cookieStorage: CookieStorage? = nil, session: Session = Session()) {
+        self.mode = mode
         self.cookieStorage = cookieStorage
         self.session = session
+        self.factory = .init(mode: mode)
     }
 
     public func saveCookies() {
@@ -52,15 +56,15 @@ public class SSOHelper {
 
     private func checkNeedCaptcha(username: String) async throws -> Bool {
         let timestamp = Date().millisecondsSince1970
-        let response = try await session.request("https://authserver.csust.edu.cn/authserver/checkNeedCaptcha.htl?username=\(username)&_=\(timestamp)").decodable(CheckResponse.self)
+        let response = try await session.request(factory.make(.authServer, "/authserver/checkNeedCaptcha.htl?username=\(username)&_=\(timestamp)")).decodable(CheckResponse.self)
         return response.isNeed
     }
 
     // 获取登录表单
     private func getLoginForm() async throws -> (LoginForm?, Bool) {
-        let response = await session.request("https://authserver.csust.edu.cn/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin").stringResponse()
+        let response = await session.request(factory.make(.authServer, "/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin")).stringResponse()
         // 已经登录
-        guard response.response?.url != URL("https://ehall.csust.edu.cn/index.html") else {
+        guard response.response?.url != URL(factory.make(.ehall, "/index.html")) else {
             return (nil, true)
         }
         guard let value = response.value else {
@@ -104,11 +108,25 @@ public class SSOHelper {
             "lt": "",
             "execution": loginForm.execution,
         ]
-        let response = await session.post("https://authserver.csust.edu.cn/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin", parameters).stringResponse()
+        let response = await session.post(factory.make(.authServer, "/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin"), parameters).stringResponse()
         guard let finalURL = response.response?.url else {
             throw SSOHelperError.loginFailed("登录失败，未找到重定向URL")
         }
-        guard finalURL == URL("https://ehall.csust.edu.cn/index.html") || finalURL == URL("https://ehall.csust.edu.cn/default/index.html") else {
+
+        var checkURL: URL = finalURL
+
+        if mode == .webVpn {
+            guard finalURL == URL("https://vpn.csust.edu.cn/login") else {
+                throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
+            }
+            let checkResponse = await session.request("https://vpn.csust.edu.cn/login?cas_login=true").stringResponse()
+            guard let checkFinalURL = checkResponse.response?.url else {
+                throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
+            }
+            checkURL = checkFinalURL
+        }
+
+        guard checkURL == URL(factory.make(.ehall, "/index.html")) || finalURL == URL(factory.make(.ehall, "/default/index.html")) else {
             throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
         }
     }
@@ -117,7 +135,7 @@ public class SSOHelper {
     /// - Throws: `SSOHelperError`
     /// - Returns: 用户信息
     public func getLoginUser() async throws -> Profile {
-        let response = try await session.request("https://ehall.csust.edu.cn/getLoginUser").decodable(LoginUserResponse.self)
+        let response = try await session.request(factory.make(.ehall, "/getLoginUser")).decodable(LoginUserResponse.self)
         guard let user = response.data else {
             throw SSOHelperError.loginUserRetrievalFailed("未找到登录用户数据")
         }
@@ -126,8 +144,8 @@ public class SSOHelper {
 
     /// 登出统一身份认证
     public func logout() async throws {
-        try await session.request("https://ehall.csust.edu.cn/logout").data()
-        try await session.request("https://authserver.csust.edu.cn/authserver/logout").data()
+        try await session.request(factory.make(.ehall, "/logout")).data()
+        try await session.request(factory.make(.authServer, "/authserver/logout")).data()
         session = Session()
     }
 
