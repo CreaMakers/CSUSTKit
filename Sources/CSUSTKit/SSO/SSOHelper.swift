@@ -165,12 +165,12 @@ public class SSOHelper {
     /// - Throws: `SSOHelperError`
     /// - Returns: 网络课程中心的会话信息
     public func loginToMooc() async throws -> Session {
-        let request = session.request("http://pt.csust.edu.cn/meol/homepage/common/sso_login.jsp")
+        let request = session.request(factory.make(.mooc, "/meol/homepage/common/sso_login.jsp"))
         let response = await request.stringResponse()
         guard let finalURL = response.response?.url else {
             throw SSOHelperError.loginToMoocFailed("网络课程中心登录失败，未找到重定向URL")
         }
-        guard finalURL == URL("http://pt.csust.edu.cn/meol/personal.do") else {
+        guard finalURL == URL(factory.make(.mooc, "/meol/personal.do")) else {
             throw SSOHelperError.loginToMoocFailed("网络课程中心登录失败，重定向URL异常: \(finalURL)")
         }
         return session

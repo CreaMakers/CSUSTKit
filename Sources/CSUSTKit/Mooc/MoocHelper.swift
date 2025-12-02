@@ -21,17 +21,21 @@ public class MoocHelper {
         let datas: Datas
     }
 
-    var session: Session
+    private let mode: ConnectionMode
+    private var session: Session
+    private let factory: URLFactory
 
-    public init(session: Session = Session()) {
+    public init(mode: ConnectionMode = .direct, session: Session = Session()) {
+        self.mode = mode
         self.session = session
+        self.factory = URLFactory(mode: mode)
     }
 
     /// 获取个人信息
     /// - Throws: `MoocHelperError`
     /// - Returns: 个人信息
     public func getProfile() async throws -> Profile {
-        let response = try await session.request("http://pt.csust.edu.cn/meol/personal.do").string(.gbk)
+        let response = try await session.request(factory.make(.mooc, "/meol/personal.do")).string(.gbk)
         let document = try SwiftSoup.parse(response)
         let elements = try document.select(".userinfobody > ul > li")
         guard elements.count >= 5 else {
@@ -56,7 +60,7 @@ public class MoocHelper {
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程列表
     public func getCourses() async throws -> [Course] {
-        let response = try await session.request("http://pt.csust.edu.cn/meol/lesson/blen.student.lesson.list.jsp").string(.gbk)
+        let response = try await session.request(factory.make(.mooc, "/meol/lesson/blen.student.lesson.list.jsp")).string(.gbk)
         let document = try SwiftSoup.parse(response)
         guard let tableElement = try document.getElementById("table2") else {
             throw MoocHelperError.courseRetrievalFailed("未找到课程表格")
@@ -77,9 +81,15 @@ public class MoocHelper {
             guard let a = try cols[1].getElementsByTag("a").first() else {
                 throw MoocHelperError.courseRetrievalFailed("未找到课程ID")
             }
-            let id = (try a.attr("onclick"))
+            var id = (try a.attr("onclick"))
                 .replacingOccurrences(of: "window.open('../homepage/course/course_index.jsp?courseId=", with: "")
                 .replacingOccurrences(of: "','manage_course')", with: "")
+
+            if mode == .webVpn {
+                id = id.replacingOccurrences(of: "var vpn_return;eval(vpn_rewrite_js((function () { ", with: "")
+                    .replacingOccurrences(of: " }).toString().slice(14, -2), 2));return vpn_return;", with: "")
+            }
+
             let department = try cols[2].text()
             let teacher = try cols[3].text()
             let course = Course(
@@ -99,7 +109,7 @@ public class MoocHelper {
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程作业列表
     public func getCourseHomeworks(courseId: String) async throws -> [Homework] {
-        let response = try await session.request("http://pt.csust.edu.cn/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(courseId)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline").decodable(HomeworksResponse.self)
+        let response = try await session.request(factory.make(.mooc, "/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(courseId)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline")).decodable(HomeworksResponse.self)
         return response.datas.hwtList?.map {
             Homework(
                 id: $0.id,
@@ -118,7 +128,7 @@ public class MoocHelper {
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程测验列表
     public func getCourseTests(courseId: String) async throws -> [Test] {
-        let response = try await session.request("http://pt.csust.edu.cn/meol/common/question/test/student/list.jsp?sortColumn=createTime&sortDirection=-1&cateId=\(courseId)&pagingPage=1&status=1&pagingNumberPer=1000").string(.gbk)
+        let response = try await session.request(factory.make(.mooc, "/meol/common/question/test/student/list.jsp?sortColumn=createTime&sortDirection=-1&cateId=\(courseId)&pagingPage=1&status=1&pagingNumberPer=1000")).string(.gbk)
         let document = try SwiftSoup.parse(response)
         guard let tableElement = try document.getElementsByClass("valuelist").first() else {
             throw MoocHelperError.testRetrievalFailed("未找到测试表格")
@@ -161,7 +171,7 @@ public class MoocHelper {
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程名称列表及其对应的课程ID
     public func getCourseNamesWithPendingHomeworks() async throws -> [(name: String, id: String)] {
-        let response = try await session.request("http://pt.csust.edu.cn/meol/welcomepage/student/interaction_reminder_v8.jsp").string(.gbk)
+        let response = try await session.request(factory.make(.mooc, "/meol/welcomepage/student/interaction_reminder_v8.jsp")).string(.gbk)
         let document = try SwiftSoup.parse(response)
         guard let reminderElement = try document.getElementById("reminder") else {
             throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("未找到提醒区域")
@@ -201,7 +211,7 @@ public class MoocHelper {
 
     /// 登出
     public func logout() async throws {
-        try await session.request("http://pt.csust.edu.cn/meol/homepage/V8/include/logout.jsp").data()
+        try await session.request(factory.make(.mooc, "/meol/homepage/V8/include/logout.jsp")).data()
         session = Session()
     }
 }
