@@ -12,7 +12,18 @@ public class WebVPNHelper {
     /// - Throws: `WebVPNHelperError`
     /// - Returns: 加密后的 WebVPN URL
     public static func encryptURL(originalURL: String) throws -> String {
-        guard let url = URL(string: originalURL),
+        var urlString = originalURL
+
+        // 如果用户没有输入 scheme，默认尝试补全 http
+        if let u = URL(string: urlString), u.scheme == nil {
+            if urlString.hasPrefix("//") {
+                urlString = "http:" + urlString
+            } else {
+                urlString = "http://" + urlString
+            }
+        }
+
+        guard let url = URL(string: urlString),
             let originalHost = url.host,
             let scheme = url.scheme
         else {
