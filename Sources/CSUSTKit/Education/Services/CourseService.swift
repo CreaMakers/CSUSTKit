@@ -236,7 +236,7 @@ extension EduHelper {
         private struct ParsedItem {
             let courseName: String
             let groupName: String?
-            let teacherName: String
+            let teacherName: String?
             let weeks: [Int]
             let startSection: Int
             let endSection: Int
@@ -266,9 +266,7 @@ extension EduHelper {
                 if courseBody.textNodes().count > 1 && !courseBody.textNodes()[1].text().trim().isEmpty {
                     groupName = courseBody.textNodes()[1].text().trim()
                 }
-                guard let teacherName = try courseBody.select("font[title='老师']").first()?.text() else {
-                    throw EduHelperError.courseScheduleRetrievalFailed("未找到教师名称")
-                }
+                let teacherName = try courseBody.select("font[title='老师']").first()?.text()
                 let classroom = try courseBody.select("font[title='教室']").first()?.text()
                 guard let dateText = try courseBody.select("font[title='周次(节次)']").first()?.text() else {
                     throw EduHelperError.courseScheduleRetrievalFailed("未找到日期文本")

@@ -6,14 +6,14 @@ extension EduHelper {
         /// 课程分组名称
         public let groupName: String?
         /// 授课教师
-        public let teacher: String
+        public let teacher: String?
         /// 上课时间
         public var sessions: [ScheduleSession]
 
         public init(
             courseName: String,
             groupName: String?,
-            teacher: String,
+            teacher: String?,
             sessions: [ScheduleSession]
         ) {
             self.courseName = courseName
