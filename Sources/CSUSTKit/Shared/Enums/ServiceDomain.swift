@@ -3,6 +3,7 @@ public enum ServiceDomain {
     case ehall
     case mooc
     case education
+    case physicsExperiment
 }
 
 extension ServiceDomain {
@@ -10,7 +11,7 @@ extension ServiceDomain {
         switch self {
         case .authServer, .ehall:
             return "https"
-        case .mooc, .education:
+        case .mooc, .education, .physicsExperiment:
             return "http"
         }
     }
@@ -25,6 +26,8 @@ extension ServiceDomain {
             return "pt.csust.edu.cn"
         case .education:
             return "xk.csust.edu.cn"
+        case .physicsExperiment:
+            return "10.255.65.52"
         }
     }
 
@@ -38,6 +41,8 @@ extension ServiceDomain {
             return "57524476706e697374686562657374213b080392a9f22f8f5c673ec2dafd24"
         case .education:
             return "57524476706e6973746865626573742133170392a9f22f8f5c673ec2dafd24"
+        case .physicsExperiment:
+            return "57524476706e697374686562657374217a4c03c3efb272cd472c6f85"
         }
     }
 }

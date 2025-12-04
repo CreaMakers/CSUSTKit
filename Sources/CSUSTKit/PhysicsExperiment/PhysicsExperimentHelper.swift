@@ -4,10 +4,14 @@ import SwiftSoup
 
 /// 物理实验教学管理助手
 public class PhysicsExperimentHelper {
-    var session: Session
+    private let mode: ConnectionMode
+    private var session: Session
+    private let factory: URLFactory
 
-    public init(session: Session = Session()) {
+    public init(mode: ConnectionMode = .direct, session: Session = Session()) {
+        self.mode = mode
         self.session = session
+        self.factory = URLFactory(mode: mode)
     }
 
     /// 登录
@@ -18,7 +22,7 @@ public class PhysicsExperimentHelper {
     public func login(username: String, password: String) async throws {
         let usernameEncoded = username.base64String
         let passwordEncoded = password.base64String
-        let urlString = "http://10.255.65.52/login.aspx?UserType=0&txtUserName=\(usernameEncoded)&txtPass=\(passwordEncoded)"
+        let urlString = factory.make(.physicsExperiment, "/login.aspx?UserType=0&txtUserName=\(usernameEncoded)&txtPass=\(passwordEncoded)")
 
         let response = try await session.request(urlString, method: .post).string()
 
@@ -31,7 +35,7 @@ public class PhysicsExperimentHelper {
     /// - Throws: `PhysicsExperimentError`
     /// - Returns: 课程列表
     public func getCourses() async throws -> [Course] {
-        let response = try await session.request("http://10.255.65.52/Student/myalltasklist.aspx?generalCourseId=2&generalCourseName=%E5%A4%A7%E5%AD%A6%E7%89%A9%E7%90%86%E5%AE%9E%E9%AA%8C").string()
+        let response = try await session.request(factory.make(.physicsExperiment, "/Student/myalltasklist.aspx?generalCourseId=2&generalCourseName=%E5%A4%A7%E5%AD%A6%E7%89%A9%E7%90%86%E5%AE%9E%E9%AA%8C")).string()
         guard !isLoginRequired(response: response) else {
             throw PhysicsExperimentError.notLoggedIn("未登录或登录已过期，请重新登录")
         }
@@ -155,7 +159,7 @@ public class PhysicsExperimentHelper {
     /// - Throws: `PhysicsExperimentError`
     /// - Returns: 课程成绩列表
     public func getCourseGrades() async throws -> [CourseGrade] {
-        let response = try await session.request("http://10.255.65.52/Student/GeneralCourseScore.aspx").string()
+        let response = try await session.request(factory.make(.physicsExperiment, "/Student/GeneralCourseScore.aspx")).string()
         guard !isLoginRequired(response: response) else {
             throw PhysicsExperimentError.notLoggedIn("未登录或登录已过期，请重新登录")
         }
@@ -210,7 +214,7 @@ public class PhysicsExperimentHelper {
 
     /// 登出当前账号
     public func logout() async throws {
-        try await session.request("http://10.255.65.52/logout.aspx").data()
+        try await session.request(factory.make(.physicsExperiment, "/logout.aspx")).data()
         session = Session()
     }
 }
