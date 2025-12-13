@@ -5,8 +5,7 @@ import Testing
 
 @testable import CSUSTKit
 
-// 定义错误类型
-enum SetupError: Error, LocalizedError {
+private enum SetupError: Error, LocalizedError {
     case missingCredentials
     var errorDescription: String? {
         return "❌ 终止测试：无法从 .env 或环境变量中读取到账号密码"
