@@ -25,9 +25,15 @@ public class WebVPNHelper {
 
         guard let url = URL(string: urlString),
             let originalHost = url.host,
-            let scheme = url.scheme
+            var scheme = url.scheme
         else {
             throw WebVPNHelperError.urlEncryptionFailed("无效的 URL 或无法获取主机名/协议")
+        }
+
+        if let port = url.port {
+            if (scheme == "http" && port != 80) || (scheme == "https" && port != 443) {
+                scheme += "-\(port)"
+            }
         }
 
         let encryptedHost: String
@@ -65,8 +71,17 @@ public class WebVPNHelper {
             throw WebVPNHelperError.urlDecryptionFailed("WebVPN URL 路径格式不正确")
         }
 
-        let scheme = pathComponents[1]
+        var scheme = pathComponents[1]
         let encryptedHost = pathComponents[2]
+
+        var port: Int?
+        if scheme.contains("-") {
+            let components = scheme.split(separator: "-")
+            if components.count == 2 {
+                scheme = String(components[0])
+                port = Int(components[1])
+            }
+        }
 
         let decryptedHost: String
         do {
@@ -75,7 +90,7 @@ public class WebVPNHelper {
             throw WebVPNHelperError.urlDecryptionFailed("解密主机名失败: \(error.localizedDescription)")
         }
 
-        let prefixToDrop = "/\(scheme)/\(encryptedHost)"
+        let prefixToDrop = "/\(pathComponents[1])/\(encryptedHost)"
         guard url.path.hasPrefix(prefixToDrop) else {
             throw WebVPNHelperError.urlDecryptionFailed("URL 路径与预期格式不符")
         }
@@ -93,7 +108,13 @@ public class WebVPNHelper {
             originalPath += "#\(fragment)"
         }
 
-        return "\(scheme)://\(decryptedHost)\(originalPath)"
+        var result = "\(scheme)://\(decryptedHost)"
+        if let port = port {
+            result += ":\(port)"
+        }
+        result += originalPath
+
+        return result
     }
 
     private static func encryptHost(_ text: String) throws -> String {
