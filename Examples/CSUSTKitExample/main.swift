@@ -1,6 +1,9 @@
+import Alamofire
 import CSUSTKit
 import DotEnvy
 import Foundation
+
+// MARK: - Environment Loading
 
 func loadAuthServerAccount() -> (String?, String?) {
     let environment = try? DotEnvironment.make()
@@ -15,6 +18,9 @@ func loadPhysicsExperimentAccount() -> (String?, String?) {
 @main
 struct Main {
     static func main() async {
+
+        // MARK: - WebVPN Encryption
+
         let originalURL = "https://www.lofter.com/front/login"
         do {
             print("原始 URL: \(originalURL)")
@@ -31,7 +37,11 @@ struct Main {
             print("Error: \(error)")
         }
 
-        let ssoHelper = SSOHelper(mode: .webVpn)
+        // MARK: - SSO Login
+
+        let session: Session = Session(interceptor: EduHelper.EduRequestInterceptor())
+
+        let ssoHelper = SSOHelper(session: session)
         do {
             let (username, password) = loadAuthServerAccount()
             guard let username = username, let password = password else {
@@ -43,14 +53,18 @@ struct Main {
 
             debugPrint(try await ssoHelper.getLoginUser())
 
-            let moocHelper = MoocHelper(mode: .webVpn, session: try await ssoHelper.loginToMooc())
+            // MARK: - Mooc Login
+
+            let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
             debugPrint(try await moocHelper.getProfile())
             debugPrint(try await moocHelper.getCourses())
             debugPrint(try await moocHelper.getCourseHomeworks(courseId: "69571"))
             debugPrint(try await moocHelper.getCourseTests(courseId: "69571"))
             debugPrint(try await moocHelper.getCourseNamesWithPendingHomeworks())
 
-            let eduHelper = EduHelper(mode: .webVpn, session: try await ssoHelper.loginToEducation())
+            // MARK: - Education Login
+
+            let eduHelper = EduHelper(session: try await ssoHelper.loginToEducation())
             debugPrint(try await eduHelper.profileService.getProfile())
             debugPrint(try await eduHelper.examService.getExamSchedule())
             debugPrint(try await eduHelper.courseService.getCourseGrades())
@@ -60,6 +74,8 @@ struct Main {
         } catch {
             print("Error: \(error)")
         }
+
+        // MARK: - Physics Experiment Login
 
         let physicsExperimentHelper = PhysicsExperimentHelper()
         do {
