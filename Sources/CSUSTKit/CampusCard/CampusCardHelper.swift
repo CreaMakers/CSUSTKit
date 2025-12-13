@@ -2,8 +2,9 @@ import Alamofire
 import Foundation
 
 /// 校园卡助手
-public actor CampusCardHelper {
-    private let session: Session = Session()
+public class CampusCardHelper: BaseHelper {
+
+    // MARK: - Models
 
     private struct QueryElecBuilding: Codable {
         let retcode: String?
@@ -62,7 +63,7 @@ public actor CampusCardHelper {
         }
     }
 
-    public init() {}
+    // MARK: - Methods
 
     /// 获取指定校区的楼栋列表
     /// - Parameter campus: 校区

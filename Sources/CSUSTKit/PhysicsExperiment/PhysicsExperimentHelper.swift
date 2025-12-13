@@ -3,16 +3,9 @@ import Foundation
 import SwiftSoup
 
 /// 物理实验教学管理助手
-public class PhysicsExperimentHelper {
-    private let mode: ConnectionMode
-    private var session: Session
-    private let factory: URLFactory
+public class PhysicsExperimentHelper: BaseHelper {
 
-    public init(mode: ConnectionMode = .direct, session: Session = Session()) {
-        self.mode = mode
-        self.session = session
-        self.factory = URLFactory(mode: mode)
-    }
+    // MARK: - Methods
 
     /// 登录
     /// - Parameters:
@@ -215,6 +208,5 @@ public class PhysicsExperimentHelper {
     /// 登出当前账号
     public func logout() async throws {
         try await session.request(factory.make(.physicsExperiment, "/logout.aspx")).data()
-        session = Session()
     }
 }

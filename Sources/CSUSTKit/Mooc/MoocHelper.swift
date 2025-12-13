@@ -3,7 +3,10 @@ import Foundation
 import SwiftSoup
 
 /// 网络课程中心助手
-public class MoocHelper {
+public class MoocHelper: BaseHelper {
+
+    // MARK: - Models
+
     private struct HomeworksResponse: Codable {
         struct Datas: Codable {
             let hwtList: [Homework]?
@@ -21,15 +24,7 @@ public class MoocHelper {
         let datas: Datas
     }
 
-    private let mode: ConnectionMode
-    private var session: Session
-    private let factory: URLFactory
-
-    public init(mode: ConnectionMode = .direct, session: Session = Session()) {
-        self.mode = mode
-        self.session = session
-        self.factory = URLFactory(mode: mode)
-    }
+    // MARK: - Methods
 
     /// 获取个人信息
     /// - Throws: `MoocHelperError`
@@ -212,6 +207,5 @@ public class MoocHelper {
     /// 登出
     public func logout() async throws {
         try await session.request(factory.make(.mooc, "/meol/homepage/V8/include/logout.jsp")).data()
-        session = Session()
     }
 }

@@ -3,7 +3,10 @@ import Foundation
 import SwiftSoup
 
 /// 统一身份认证助手
-public class SSOHelper {
+public class SSOHelper: BaseHelper {
+
+    // MARK: - Models
+
     private struct LoginForm {
         let pwdEncryptSalt: String
         let execution: String
@@ -25,34 +28,7 @@ public class SSOHelper {
         let time: Int?
     }
 
-    private let mode: ConnectionMode
-    private var session: Session
-    private let factory: URLFactory
-    private let cookieStorage: CookieStorage?
-    private let interceptor = EduHelper.EduRequestInterceptor(maxRetryCount: 5)
-
-    public init(mode: ConnectionMode = .direct, cookieStorage: CookieStorage? = nil, session: Session = Session()) {
-        self.mode = mode
-        self.cookieStorage = cookieStorage
-        self.session = session
-        self.factory = .init(mode: mode)
-    }
-
-    public func saveCookies() {
-        cookieStorage?.saveCookies(for: session)
-    }
-
-    public func restoreCookies() {
-        cookieStorage?.restoreCookies(to: session)
-    }
-
-    public func clearCookies() {
-        cookieStorage?.clearCookies()
-    }
-
-    public func getSession() -> Session {
-        session
-    }
+    // MARK: - Methods
 
     private func checkNeedCaptcha(username: String) async throws -> Bool {
         let timestamp = Date().millisecondsSince1970
@@ -146,15 +122,14 @@ public class SSOHelper {
     public func logout() async throws {
         try await session.request(factory.make(.ehall, "/logout")).data()
         try await session.request(factory.make(.authServer, "/authserver/logout")).data()
-        session = Session()
     }
 
     /// 从统一身份认证登录教务系统
     /// - Throws: `SSOHelperError`
     /// - Returns: 教务系统的会话信息
     public func loginToEducation() async throws -> Session {
-        try await session.request(factory.make(.education, "/sso.jsp"), interceptor: interceptor).data()
-        let response = try await session.request(factory.make(.authServer, "/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp"), interceptor: interceptor).string()
+        try await session.request(factory.make(.education, "/sso.jsp")).data()
+        let response = try await session.request(factory.make(.authServer, "/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp")).string()
         guard !response.contains("请输入账号") else {
             throw SSOHelperError.loginToEducationFailed("教务登录失败")
         }
