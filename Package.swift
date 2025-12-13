@@ -35,5 +35,13 @@ let package = Package(
             ],
             path: "Examples"
         ),
+        .testTarget(
+            name: "CSUSTKitTests",
+            dependencies: [
+                "CSUSTKit",
+                .product(name: "DotEnvy", package: "dotenvy"),
+            ],
+            path: "Tests"
+        )
     ]
 )
