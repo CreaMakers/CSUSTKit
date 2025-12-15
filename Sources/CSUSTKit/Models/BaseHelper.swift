@@ -10,4 +10,10 @@ public class BaseHelper {
         self.session = session
         self.factory = .init(mode: mode)
     }
+
+    /// 检查是否登录
+    /// - Returns: 是否登录
+    public func isLoggedIn() async -> Bool {
+        return false
+    }
 }

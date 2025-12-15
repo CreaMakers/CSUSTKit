@@ -130,7 +130,7 @@ public class SSOHelper: BaseHelper {
     public func loginToEducation() async throws -> Session {
         try await session.request(factory.make(.education, "/sso.jsp")).data()
         let response = try await session.request(factory.make(.authServer, "/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp")).string()
-        guard !response.contains("请输入账号") else {
+        guard !response.contains("账号登录") else {
             throw SSOHelperError.loginToEducationFailed("教务登录失败")
         }
         return session
@@ -215,5 +215,9 @@ public class SSOHelper: BaseHelper {
         guard finalURL == URL("https://ehall.csust.edu.cn/index.html") else {
             throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是验证码错误")
         }
+    }
+
+    public override func isLoggedIn() async -> Bool {
+        return (try? await getLoginUser()) != nil
     }
 }
