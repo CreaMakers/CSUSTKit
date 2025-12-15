@@ -26,6 +26,10 @@ public class MoocHelper: BaseHelper {
 
     // MARK: - Methods
 
+    public override func isLoggedIn() async -> Bool {
+        return (try? await getProfile()) != nil
+    }
+
     private func isLoginRequired(response: String) -> Bool {
         return response.contains("<TITLE>错误！</TITLE>") || response.contains("请登录！")
     }
