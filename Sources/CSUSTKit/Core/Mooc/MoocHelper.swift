@@ -126,15 +126,25 @@ public class MoocHelper: BaseHelper {
             throw MoocHelperError.homeworkRetrievalFailed("作业信息格式无效")
         }
         let response = try JSONDecoder().decode(HomeworksResponse.self, from: responseData)
-        return response.datas.hwtList?.map {
-            Homework(
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(identifier: "Asia/Shanghai")
+
+        return response.datas.hwtList?.compactMap {
+            guard let deadline = dateFormatter.date(from: $0.deadLine),
+                let startTime = dateFormatter.date(from: $0.startDateTime)
+            else {
+                return nil
+            }
+            return Homework(
                 id: $0.id,
                 title: $0.title,
                 publisher: $0.realName,
                 canSubmit: $0.submitStruts,
                 submitStatus: $0.answerStatus != nil,
-                deadline: $0.deadLine,
-                startTime: $0.startDateTime
+                deadline: deadline,
+                startTime: startTime
             )
         } ?? []
     }

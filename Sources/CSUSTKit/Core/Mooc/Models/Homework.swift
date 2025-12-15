@@ -1,3 +1,5 @@
+import Foundation
+
 extension MoocHelper {
     /// 课程作业
     public struct Homework: BaseModel {
@@ -12,9 +14,9 @@ extension MoocHelper {
         /// 提交状态
         public let submitStatus: Bool
         /// 提交截止时间
-        public let deadline: String
+        public let deadline: Date
         /// 开始提交时间
-        public let startTime: String
+        public let startTime: Date
 
         public init(
             id: Int,
@@ -22,8 +24,8 @@ extension MoocHelper {
             publisher: String,
             canSubmit: Bool,
             submitStatus: Bool,
-            deadline: String,
-            startTime: String
+            deadline: Date,
+            startTime: Date
         ) {
             self.id = id
             self.title = title
