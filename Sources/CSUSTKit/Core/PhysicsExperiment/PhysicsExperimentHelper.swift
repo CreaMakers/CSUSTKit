@@ -7,6 +7,10 @@ public class PhysicsExperimentHelper: BaseHelper {
 
     // MARK: - Methods
 
+    public override func isLoggedIn() async -> Bool {
+        return (try? await getCourses()) != nil
+    }
+
     /// 登录
     /// - Parameters:
     ///   - username: 用户名
@@ -30,7 +34,7 @@ public class PhysicsExperimentHelper: BaseHelper {
     public func getCourses() async throws -> [Course] {
         let response = try await session.request(factory.make(.physicsExperiment, "/Student/myalltasklist.aspx?generalCourseId=2&generalCourseName=%E5%A4%A7%E5%AD%A6%E7%89%A9%E7%90%86%E5%AE%9E%E9%AA%8C")).string()
         guard !isLoginRequired(response: response) else {
-            throw PhysicsExperimentError.notLoggedIn("未登录或登录已过期，请重新登录")
+            throw PhysicsExperimentError.notLoggedIn
         }
 
         let document = try SwiftSoup.parse(response)
@@ -154,7 +158,7 @@ public class PhysicsExperimentHelper: BaseHelper {
     public func getCourseGrades() async throws -> [CourseGrade] {
         let response = try await session.request(factory.make(.physicsExperiment, "/Student/GeneralCourseScore.aspx")).string()
         guard !isLoginRequired(response: response) else {
-            throw PhysicsExperimentError.notLoggedIn("未登录或登录已过期，请重新登录")
+            throw PhysicsExperimentError.notLoggedIn
         }
 
         let document = try SwiftSoup.parse(response)
