@@ -30,7 +30,7 @@ extension SSOHelper {
             case .loginToMoocFailed(let message):
                 return "网络课程中心登录失败: \(message)"
             case .notLoggedIn:
-                return "未登录统一身份认证"
+                return "统一身份认证未登录"
             }
         }
     }

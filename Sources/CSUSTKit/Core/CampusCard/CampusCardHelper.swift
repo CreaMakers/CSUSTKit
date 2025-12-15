@@ -65,6 +65,11 @@ public class CampusCardHelper: BaseHelper {
 
     // MARK: - Methods
 
+    public override func isLoggedIn() async -> Bool {
+        // 无需登录
+        return true
+    }
+
     /// 获取指定校区的楼栋列表
     /// - Parameter campus: 校区
     /// - Throws: `CampusCardHelperError`

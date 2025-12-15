@@ -38,7 +38,7 @@ extension EduHelper {
             case .profileRetrievalFailed(let message):
                 return "个人信息获取失败: \(message)"
             case .notLoggedIn:
-                return "未登录教务系统"
+                return "教务系统未登录"
             case .examScheduleRetrievalFailed(let message):
                 return "考试安排获取失败: \(message)"
             case .availableSemestersForExamScheduleRetrievalFailed(let message):
