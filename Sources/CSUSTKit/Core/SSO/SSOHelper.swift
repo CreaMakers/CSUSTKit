@@ -44,7 +44,7 @@ public class SSOHelper: BaseHelper {
             return (nil, true)
         }
         guard let value = response.value else {
-            throw SSOHelperError.getLoginFormFailed("获取登录表单失败")
+            throw SSOHelperError.getLoginFormFailed("无响应数据")
         }
         let document = try SwiftSoup.parse(value)
         guard let pwdEncryptSaltInput = try document.select("input#pwdEncryptSalt").first() else {
@@ -86,24 +86,24 @@ public class SSOHelper: BaseHelper {
         ]
         let response = await session.post(factory.make(.authServer, "/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin"), parameters).stringResponse()
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginFailed("登录失败，未找到重定向URL")
+            throw SSOHelperError.loginFailed("未找到重定向URL")
         }
 
         var checkURL: URL = finalURL
 
         if mode == .webVpn {
             guard finalURL == URL("https://vpn.csust.edu.cn/login") else {
-                throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
+                throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是密码错误")
             }
             let checkResponse = await session.request("https://vpn.csust.edu.cn/login?cas_login=true").stringResponse()
             guard let checkFinalURL = checkResponse.response?.url else {
-                throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
+                throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是密码错误")
             }
             checkURL = checkFinalURL
         }
 
         guard checkURL == URL(factory.make(.ehall, "/index.html")) || finalURL == URL(factory.make(.ehall, "/default/index.html")) else {
-            throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是密码错误")
+            throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是密码错误")
         }
     }
 
@@ -113,7 +113,7 @@ public class SSOHelper: BaseHelper {
     public func getLoginUser() async throws -> Profile {
         let response = try await session.request(factory.make(.ehall, "/getLoginUser")).decodable(LoginUserResponse.self)
         guard let user = response.data else {
-            throw SSOHelperError.loginUserRetrievalFailed("未找到登录用户数据")
+            throw SSOHelperError.notLoggedIn
         }
         return user
     }
@@ -131,7 +131,7 @@ public class SSOHelper: BaseHelper {
         try await session.request(factory.make(.education, "/sso.jsp")).data()
         let response = try await session.request(factory.make(.authServer, "/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp")).string()
         guard !response.contains("账号登录") else {
-            throw SSOHelperError.loginToEducationFailed("教务登录失败")
+            throw SSOHelperError.notLoggedIn
         }
         return session
     }
@@ -143,10 +143,13 @@ public class SSOHelper: BaseHelper {
         let request = session.request(factory.make(.mooc, "/meol/homepage/common/sso_login.jsp"))
         let response = await request.stringResponse()
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginToMoocFailed("网络课程中心登录失败，未找到重定向URL")
+            throw SSOHelperError.loginToMoocFailed("未找到重定向URL")
+        }
+        guard !finalURL.path.contains("/authserver/login") else {
+            throw SSOHelperError.notLoggedIn
         }
         guard finalURL == URL(factory.make(.mooc, "/meol/personal.do")) else {
-            throw SSOHelperError.loginToMoocFailed("网络课程中心登录失败，重定向URL异常: \(finalURL)")
+            throw SSOHelperError.loginToMoocFailed("重定向URL异常: \(finalURL)")
         }
         return session
     }
@@ -157,7 +160,7 @@ public class SSOHelper: BaseHelper {
     public func getCaptcha() async throws -> Data {
         let response = try await session.request("https://authserver.csust.edu.cn/authserver/getCaptcha.htl").data()
         guard !response.isEmpty else {
-            throw SSOHelperError.captchaRetrievalFailed("获取验证码失败")
+            throw SSOHelperError.captchaRetrievalFailed
         }
         return response
     }
@@ -176,11 +179,11 @@ public class SSOHelper: BaseHelper {
         request.httpBody = "mobile=\(mobile)&captcha=\(captcha)".data(using: .utf8)
         let (data, _) = try await URLSession.shared.data(for: request)
         guard !data.isEmpty else {
-            throw SSOHelperError.dynamicCodeRetrievalFailed("获取动态码失败")
+            throw SSOHelperError.dynamicCodeRetrievalFailed("无响应数据")
         }
         let response = try JSONDecoder().decode(GetDynamicCodeResponse.self, from: data)
         guard response.code == "success" else {
-            throw SSOHelperError.dynamicCodeRetrievalFailed("获取动态码失败: \(response.message)")
+            throw SSOHelperError.dynamicCodeRetrievalFailed("错误，\(response.message)")
         }
     }
 
@@ -210,10 +213,10 @@ public class SSOHelper: BaseHelper {
         ]
         let response = await session.post("https://authserver.csust.edu.cn/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin", parameters).stringResponse()
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginFailed("登录失败，未找到重定向URL")
+            throw SSOHelperError.loginFailed("未找到重定向URL")
         }
         guard finalURL == URL("https://ehall.csust.edu.cn/index.html") else {
-            throw SSOHelperError.loginFailed("登录失败，重定向URL异常: \(finalURL) 可能是验证码错误")
+            throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是验证码错误")
         }
     }
 
