@@ -23,4 +23,11 @@ public class EduHelper: BaseHelper {
         semesterService = SemesterService(mode: mode, session: session)
         super.init(mode: mode, session: session)
     }
+
+    public override func isLoggedIn() async -> Bool {
+        guard let result = try? await authService.checkLoginStatus() else {
+            return false
+        }
+        return result
+    }
 }

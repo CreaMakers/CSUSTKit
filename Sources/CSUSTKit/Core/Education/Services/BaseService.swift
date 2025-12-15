@@ -19,7 +19,7 @@ extension EduHelper {
         internal func performRequest(_ url: String, _ method: HTTPMethod = .get, _ parameters: [String: String]? = nil) async throws -> String {
             let response = try await session.request(url, method: method, parameters: parameters, encoding: URLEncoding.default).string()
             if isLoginRequired(response: response) {
-                throw EduHelperError.notLoggedIn("未登录或登录已过期，请重新登录")
+                throw EduHelperError.notLoggedIn
             }
             return response
         }

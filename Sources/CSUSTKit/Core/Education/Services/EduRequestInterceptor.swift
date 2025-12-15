@@ -4,7 +4,7 @@ extension EduHelper {
     public struct EduRequestInterceptor: RequestInterceptor {
         private let maxRetryCount: Int
 
-        public init(maxRetryCount: Int = 3) {
+        public init(maxRetryCount: Int = 5) {
             self.maxRetryCount = maxRetryCount
         }
 
