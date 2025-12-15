@@ -1,53 +1,71 @@
 # CSUSTKit
 
-一个用于访问长沙理工大学各个系统 API 的 Swift 库，支持教务系统、慕课平台、校园卡系统和 SSO 统一认证。
+CSUSTKit 是目前特性最全、覆盖面最广的长沙理工大学校园服务 API 库。本项目旨在为开发者提供一套优雅、统一的 Swift 接口，以轻松访问学校的各类业务系统。
 
-## 特性
+无论是构建学生辅助工具、校园生活应用，还是进行相关的数据分析研究，CSUSTKit 都能提供强大的底层支持。
 
-- 🔐 **SSO**: 统一身份认证服务
-- 📚 **Education**: 教务系统（课程、成绩、考试等）
-- 🎓 **Mooc**: 慕课平台接口
-- 💳 **CampusCard**: 校园一卡通服务
+## 🌟 核心功能
 
-## 安装
+本项目深度集成了学校五大核心业务系统，提供了丰富的数据访问能力：
 
-### Swift Package Manager
+- **统一身份认证 (SSO)**
+  - 支持 `authserver` 统一认证登录。
+  - 实现 Session 自动管理与跨系统会话打通。
 
-在你的 `Package.swift` 文件中添加依赖：
+- **教务系统 (Education System)**
+  - 获取个人课表、学期安排。
+  - 查询考试安排与考场信息。
+  - 获取课程成绩与学分详情。
+
+- **网络教学平台 (Mooc)**
+  - 查询课程列表与教学班信息。
+  - 获取课程作业、测验及其完成状态。
+  - 支持查询未完成的作业提醒。
+
+- **大学物理实验平台 (Physics Experiment)**
+  - 独立的实验平台认证支持。
+  - 获取物理实验课程安排。
+  - 查询实验成绩与报告状态。
+
+- **校园卡服务 (Campus Card)**
+  - 支持多校区（金盆岭、云塘等）楼栋信息查询。
+  - 实时查询宿舍剩余电量。
+
+## 🚀 独家特性：WebVPN 支持
+
+针对校园网内网访问限制的痛点，CSUSTKit 内置了完善的 **WebVPN** 支持：
+
+*   **内网穿透**: 即使在非校园网环境下，也可以通过 WebVPN (`vpn.csust.edu.cn`) 代理访问仅限内网开放的系统（如教务系统）。
+*   **智能处理**: 库内部自动处理 WebVPN 的 URL 加密与解密逻辑，开发者无需关心复杂的协议细节，即可实现内网服务的无缝访问。
+
+## 📦 安装集成
+
+本项目支持使用 **Swift Package Manager (SPM)** 进行集成。开发者只需在 `Package.swift` 中添加依赖即可快速使用。
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/zHElEARN/CSUSTKit.git", from: "1.0.0")
+    .package(url: "https://github.com/CreaMakers/CSUSTKit.git", from: "1.0.0")
 ]
 ```
 
-### Xcode
+## 📖 使用指南
 
-1. 打开你的 Xcode 项目
-2. 选择 **File** → **Add Package Dependencies**
-3. 输入仓库 URL: `https://github.com/zHElEARN/CSUSTKit.git`
+为了保持文档的简洁，我们不再此处罗列冗长的代码片段。
 
-## 使用示例
+关于如何初始化各个 Helper、如何处理登录流程以及如何调用具体 API，请参考项目中的示例工程：
 
-```swift
-import CSUSTKit
+👉 **[查看完整示例代码](Examples/CSUSTKitExample/main.swift)**
 
-// SSO 登录
-let ssoHelper = SSOHelper()
-try await ssoHelper.login(username: "your_username", password: "your_password")
+该示例文件包含了从环境配置、SSO 登录、子系统访问到 WebVPN 工具使用的完整流程演示。
 
-// 获取用户信息
-let user = try await ssoHelper.getLoginUser()
+## 📄 许可证
 
-// 访问慕课平台
-let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
-let profile = try await moocHelper.getProfile()
+本项目采用 **Mozilla Public License 2.0 (MPL-2.0)** 许可证。
 
-// 教务系统操作
-let eduHelper = EduHelper(session: try await ssoHelper.loginToEducation())
-let courses = try await eduHelper.getCourses()
-```
+这意味着：
+- 您可以自由地使用、修改和分发本项目的源代码。
+- 如果您修改了本项目的文件，则必须公开这些文件的源代码（即使您的项目是闭源的）。
+- 详见 [LICENSE](LICENSE) 文件。
 
-## 许可证
-
-本项目仅供学习和研究使用，请遵守学校相关规定。
+---
+*Disclaimer: 本项目仅供学习与技术研究使用，请勿用于任何非法用途。在使用过程中请遵守学校相关网络安全规定。*
