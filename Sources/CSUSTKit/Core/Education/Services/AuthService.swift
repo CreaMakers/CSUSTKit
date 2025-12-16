@@ -4,13 +4,6 @@ import Foundation
 extension EduHelper {
     /// 认证服务
     public class AuthService: BaseService {
-        /// 检查当前登录状态
-        /// - Returns: 是否已登录
-        public func checkLoginStatus() async throws -> Bool {
-            let response = try await session.request(factory.make(.education, "/jsxsd/framework/xsMain.jsp")).string()
-            return !isLoginRequired(response: response)
-        }
-
         /// 获取登录验证码
         /// - Returns: 登录验证码图片数据
         public func getCaptcha() async throws -> Data {

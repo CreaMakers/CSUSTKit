@@ -25,9 +25,6 @@ public class EduHelper: BaseHelper {
     }
 
     public override func isLoggedIn() async -> Bool {
-        guard let result = try? await authService.checkLoginStatus() else {
-            return false
-        }
-        return result
+        return (try? await profileService.getProfile()) != nil
     }
 }
