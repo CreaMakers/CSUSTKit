@@ -58,9 +58,9 @@ struct Main {
             let moocHelper = MoocHelper(session: try await ssoHelper.loginToMooc())
             debugPrint(try await moocHelper.getProfile())
             debugPrint(try await moocHelper.getCourses())
-            debugPrint(try await moocHelper.getCourseHomeworks(courseId: "69571"))
+            debugPrint(try await moocHelper.getCourseAssignments(courseId: "69571"))
             debugPrint(try await moocHelper.getCourseTests(courseId: "69571"))
-            debugPrint(try await moocHelper.getCourseNamesWithPendingHomeworks())
+            debugPrint(try await moocHelper.getCourseNamesWithPendingAssignments())
 
             // MARK: - Education Login
 

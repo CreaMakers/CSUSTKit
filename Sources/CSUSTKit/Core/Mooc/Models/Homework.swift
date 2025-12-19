@@ -2,7 +2,7 @@ import Foundation
 
 extension MoocHelper {
     /// 课程作业
-    public struct Homework: BaseModel {
+    public struct Assignment: BaseModel {
         /// 作业ID
         public let id: Int
         /// 作业标题

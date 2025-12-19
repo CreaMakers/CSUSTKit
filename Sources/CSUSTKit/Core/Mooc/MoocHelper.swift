@@ -7,10 +7,10 @@ public class MoocHelper: BaseHelper {
 
     // MARK: - Models
 
-    private struct HomeworksResponse: Codable {
+    private struct AssignmentsResponse: Codable {
         struct Datas: Codable {
-            let hwtList: [Homework]?
-            struct Homework: Codable {
+            let hwtList: [Assignment]?
+            struct Assignment: Codable {
                 let realName: String
                 let startDateTime: String
                 let mutualTask: String
@@ -117,15 +117,15 @@ public class MoocHelper: BaseHelper {
     /// - Parameter courseId: 课程ID
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程作业列表
-    public func getCourseHomeworks(courseId: String) async throws -> [Homework] {
+    public func getCourseAssignments(courseId: String) async throws -> [Assignment] {
         let responseString = try await session.request(factory.make(.mooc, "/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(courseId)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline")).string()
         if isLoginRequired(response: responseString) {
             throw MoocHelperError.notLoggedIn
         }
         guard let responseData = responseString.data(using: .utf8) else {
-            throw MoocHelperError.homeworkRetrievalFailed("作业信息格式无效")
+            throw MoocHelperError.assignmentsRetrievalFailed("作业信息格式无效")
         }
-        let response = try JSONDecoder().decode(HomeworksResponse.self, from: responseData)
+        let response = try JSONDecoder().decode(AssignmentsResponse.self, from: responseData)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -137,7 +137,7 @@ public class MoocHelper: BaseHelper {
             else {
                 return nil
             }
-            return Homework(
+            return Assignment(
                 id: $0.id,
                 title: $0.title,
                 publisher: $0.realName,
@@ -199,16 +199,16 @@ public class MoocHelper: BaseHelper {
     /// 获取有待完成作业的课程名称
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程名称列表及其对应的课程ID
-    public func getCourseNamesWithPendingHomeworks() async throws -> [(name: String, id: String)] {
+    public func getCourseNamesWithPendingAssignments() async throws -> [(name: String, id: String)] {
         let response = try await session.request(factory.make(.mooc, "/meol/welcomepage/student/interaction_reminder_v8.jsp")).string(.gbk)
         if isLoginRequired(response: response) {
             throw MoocHelperError.notLoggedIn
         }
         let document = try SwiftSoup.parse(response)
         guard let reminderElement = try document.getElementById("reminder") else {
-            throw MoocHelperError.courseNamesWithPendingHomeworksRetrievalFailed("未找到提醒区域")
+            throw MoocHelperError.courseNamesWithPendingAssignmentsRetrievalFailed("未找到提醒区域")
         }
-        let homeworkListElement = reminderElement.children()
+        let assignmentsElement = reminderElement.children()
             .first(where: { (element: Element) -> Bool in
                 guard let linkText = try? element.select("a").first()?.ownText() else {
                     return false
@@ -216,7 +216,7 @@ public class MoocHelper: BaseHelper {
                 return linkText.contains("待提交作业")
             })
 
-        guard let courseNamesContainer = homeworkListElement else {
+        guard let courseNamesContainer = assignmentsElement else {
             return []
         }
 
