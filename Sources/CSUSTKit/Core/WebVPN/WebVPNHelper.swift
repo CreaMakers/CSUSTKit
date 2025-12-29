@@ -118,38 +118,47 @@ public class WebVPNHelper {
     }
 
     private static func encryptHost(_ text: String) throws -> String {
-        guard let keyBytes = key.data(using: .utf8)?.byteArray,
-            let ivBytes = iv.data(using: .utf8)?.byteArray,
-            let textBytes = text.data(using: .utf8)?.byteArray
+        guard let keyData = key.data(using: .utf8),
+            let ivData = iv.data(using: .utf8),
+            let textData = text.data(using: .utf8)
         else {
             throw WebVPNHelperError.hostEncryptionFailed("无法转换密钥、初始向量或文本为字节数组")
         }
+
+        let keyBytes = [UInt8](keyData)
+        let ivBytes = [UInt8](ivData)
+        let textBytes = [UInt8](textData)
 
         do {
             let aes = try AES(key: keyBytes, blockMode: CFB(iv: ivBytes), padding: .noPadding)
             let paddedTextBytes = textRightAppendBytes(dataBytes: textBytes)
             let encryptedBytes = try aes.encrypt(paddedTextBytes)
-            let hexEncrypted = Data(encryptedBytes).toHexString()
+
+            let hexEncrypted = encryptedBytes.toHexString()
             let truncatedHex = String(hexEncrypted.prefix(text.count * 2))
-            return Data(ivBytes).toHexString() + truncatedHex
+            return ivBytes.toHexString() + truncatedHex
         } catch {
             throw WebVPNHelperError.hostEncryptionFailed("AES加密失败: \(error.localizedDescription)")
         }
     }
 
     private static func decryptHost(_ hexText: String) throws -> String {
-        guard let keyBytes = key.data(using: .utf8)?.byteArray,
-            let ivBytes = iv.data(using: .utf8)?.byteArray
+        guard let keyData = key.data(using: .utf8),
+            let ivData = iv.data(using: .utf8)
         else {
             throw WebVPNHelperError.hostDecryptionFailed("无法转换密钥或初始向量为字节数组")
         }
 
+        let keyBytes = [UInt8](keyData)
+        let ivBytes = [UInt8](ivData)
+
         do {
             let aes = try AES(key: keyBytes, blockMode: CFB(iv: ivBytes), padding: .noPadding)
-            let ivHexLen = Data(ivBytes).toHexString().count
+            let ivHexLen = ivBytes.toHexString().count
             let encryptedPartHex = String(hexText.dropFirst(ivHexLen))
             let originalTextLength = encryptedPartHex.count / 2
             let paddedHexPayload = textRightAppendHex(hexString: encryptedPartHex)
+
             let encryptedBytes = [UInt8](hex: paddedHexPayload)
 
             let decryptedBytes = try aes.decrypt(encryptedBytes)

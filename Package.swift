@@ -15,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.10.2")),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.8.8"),
         .package(url: "https://github.com/juri/dotenvy.git", from: "0.3.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.9.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.4"),
     ],
     targets: [
         .target(
