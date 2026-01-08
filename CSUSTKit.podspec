@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'CSUSTKit'
-  s.version          = '1.4.3'
+  s.version          = '1.4.4'
   s.summary          = 'CSUSTKit 为长沙理工大学学生提供的开发套件。'
   s.homepage         = 'https://github.com/CreaMakers/CSUSTKit'
   s.license          = { :type => 'MPL-2.0', :file => 'LICENSE' }
