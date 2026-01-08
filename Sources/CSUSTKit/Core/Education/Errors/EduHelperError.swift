@@ -29,6 +29,8 @@ extension EduHelper {
         case availableSemestersForStartDateRetrievalFailed(String)
         /// 日期解析失败
         case dateParsingFailed(String)
+        /// 指定校区在指定时间内空闲的教室列表获取失败
+        case availableClassroomsRetrievalFailed(String)
 
         /// 错误描述
         public var errorDescription: String? {
@@ -59,6 +61,8 @@ extension EduHelper {
                 return "开始日期可选学期获取失败: \(message)"
             case .dateParsingFailed(let message):
                 return "日期解析失败: \(message)"
+            case .availableClassroomsRetrievalFailed(let message):
+                return "指定校区在指定时间内空闲的教室列表获取失败: \(message)"
             }
         }
     }
