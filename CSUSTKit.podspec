@@ -2,11 +2,11 @@ Pod::Spec.new do |s|
   s.name             = 'CSUSTKit'
   s.version          = '1.4.4'
   s.summary          = 'CSUSTKit 为长沙理工大学学生提供的开发套件。'
-  s.homepage         = 'https://github.com/CreaMakers/CSUSTKit'
+  s.homepage         = 'https://github.com/zHElEARN/CSUSTKit'
   s.license          = { :type => 'MPL-2.0', :file => 'LICENSE' }
   s.author           = { 'Zachary Liu' => 'personal@zhelearn.com' }
 
-  s.source           = { :git => 'https://github.com/CreaMakers/CSUSTKit.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/zHElEARN/CSUSTKit.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '13.0'
   s.osx.deployment_target = '10.15'
