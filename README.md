@@ -1,78 +1,78 @@
 # CSUSTKit
 
-CSUSTKit 是目前特性最全、覆盖面最广的长沙理工大学校园服务 API 库。本项目旨在为开发者提供一套优雅、统一的 Swift 接口，以轻松访问学校的各类业务系统。
+CSUSTKit 是目前特性最全、覆盖面最广的长沙理工大学校园服务 API 库。本项目旨在为开发者提供一套统一的 Swift 接口，以轻松访问学校的各类业务系统。
 
 无论是构建学生辅助工具、校园生活应用，还是进行相关的数据分析研究，CSUSTKit 都能提供强大的底层支持。
 
-## 🌟 核心功能
+## 核心功能
 
-本项目深度集成了学校五大核心业务系统，提供了丰富的数据访问能力：
+CSUSTKit 集成了以下学校业务系统：
 
-- **统一身份认证 (SSO)**
+- 统一身份认证
+  - 支持统一认证登录
+  - 实现 Session 自动管理
+  - 从统一身份认证登录其他系统
 
-  - 支持 `authserver` 统一认证登录。
-  - 实现 Session 自动管理与跨系统会话打通。
+- 教务系统
+  - 获取个人课表、学期安排等
+  - 查询考试安排与考场信息等
+  - 获取课程成绩与学分详情等
+  - ...
 
-- **教务系统 (Education System)**
+- 网络教学平台
+  - 查询课程列表
+  - 获取课程作业、测验及其完成状态
+  - 支持查询未完成的作业
 
-  - 获取个人课表、学期安排。
-  - 查询考试安排与考场信息。
-  - 获取课程成绩与学分详情。
+- 大学物理实验平台
+  - 获取物理实验课程安排
+  - 查询实验成绩与报告状态
 
-- **网络教学平台 (Mooc)**
+- 校园卡服务
+  - 实时查询宿舍剩余电量
 
-  - 查询课程列表与教学班信息。
-  - 获取课程作业、测验及其完成状态。
-  - 支持查询未完成的作业提醒。
+> [!TIP]
+> 针对偶发的校园网内网访问限制问题，CSUSTKit 提供了完善的 **WebVPN** 支持：
+>
+> - **WebVPN访问**: 即使在非校园网环境下，也可以通过 WebVPN (`vpn.csust.edu.cn`) 代理访问仅限内网开放的系统（如教务系统）。
+> - **自动处理**: 库内部自动处理 WebVPN 的 URL 加密与解密逻辑，开发者无需关心复杂的协议细节，即可实现内网服务的无缝访问。
 
-- **大学物理实验平台 (Physics Experiment)**
-
-  - 独立的实验平台认证支持。
-  - 获取物理实验课程安排。
-  - 查询实验成绩与报告状态。
-
-- **校园卡服务 (Campus Card)**
-  - 支持多校区（金盆岭、云塘等）楼栋信息查询。
-  - 实时查询宿舍剩余电量。
-
-## 🚀 独家特性：WebVPN 支持
-
-针对校园网内网访问限制的痛点，CSUSTKit 内置了完善的 **WebVPN** 支持：
-
-- **内网穿透**: 即使在非校园网环境下，也可以通过 WebVPN (`vpn.csust.edu.cn`) 代理访问仅限内网开放的系统（如教务系统）。
-- **智能处理**: 库内部自动处理 WebVPN 的 URL 加密与解密逻辑，开发者无需关心复杂的协议细节，即可实现内网服务的无缝访问。
-
-## 📦 安装集成
+## 安装集成
 
 ### Swift Package Manager
 
-本项目支持使用 **Swift Package Manager (SPM)** 进行集成。开发者只需在 `Package.swift` 中添加依赖即可快速使用。
+通过`Package.swift`添加依赖：
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/CreaMakers/CSUSTKit.git", from: "1.0.0")
+    .package(url: "https://github.com/zHElEARN/CSUSTKit.git", from: "1.0.0")
 ]
 ```
 
+通过Xcode添加依赖：
+
+1. 打开你的Xcode项目
+2. 选择File -> Add Packages Dependencies...
+3. 在搜索框中输入 `https://github.com/zHElEARN/CSUSTKit.git`
+4. 选择 `CSUSTKit` 并点击 `Add Package`
+
 ### CocoaPods
 
-CSUSTKit 也支持通过 **CocoaPods** 进行安装。将以下行添加到您的 `Podfile` 中：
+将以下行添加到您的 `Podfile` 中：
 
 ```ruby
 pod 'CSUSTKit'
 ```
 
-## 📖 使用指南
+## 使用指南
 
-为了保持文档的简洁，我们不再此处罗列冗长的代码片段。
+请查看示例代码：
 
-关于如何初始化各个 Helper、如何处理登录流程以及如何调用具体 API，请参考项目中的示例工程：
-
-👉 **[查看完整示例代码](Examples/CSUSTKitExample/main.swift)**
+**[Examples/CSUSTKitExample/main.swift](Examples/CSUSTKitExample/main.swift)**
 
 该示例文件包含了从环境配置、SSO 登录、子系统访问到 WebVPN 工具使用的完整流程演示。
 
-## 📄 许可证
+## 许可证
 
 本项目采用 **Mozilla Public License 2.0 (MPL-2.0)** 许可证。
 
@@ -82,6 +82,14 @@ pod 'CSUSTKit'
 - 如果您修改了本项目的文件，则必须公开这些文件的源代码（即使您的项目是闭源的）。
 - 详见 [LICENSE](LICENSE) 文件。
 
+## 贡献
+
+欢迎并鼓励大家为 CSUSTKit 做出贡献，您可以 Fork 项目，进行修改并提交 Pull
+
+如果您在使用过程中遇到问题，或对 CSUSTKit 有任何建议，也欢迎提交 Issue来告知我们！
+
+同时，也可以通过邮箱联系我们：[personal@zhelearn.com](mailto:personal@zhelearn.com)
+
 ---
 
-_Disclaimer: 本项目仅供学习与技术研究使用，请勿用于任何非法用途。在使用过程中请遵守学校相关网络安全规定。_
+_免责声明: 本项目仅供学习与技术研究使用，请勿用于任何非法用途。在使用过程中请遵守学校相关网络安全规定。_
