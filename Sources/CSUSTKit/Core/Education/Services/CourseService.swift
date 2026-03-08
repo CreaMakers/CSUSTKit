@@ -70,7 +70,7 @@ extension EduHelper {
                     throw EduHelperError.courseGradesRetrievalFailed("学分格式无效: \(creditString)")
                 }
                 let totalHoursString = try cols[9].text().trim()
-                guard let totalHours = Int(totalHoursString) else {
+                guard let totalHours = Double(totalHoursString) else {
                     throw EduHelperError.courseGradesRetrievalFailed("总学时格式无效: \(totalHoursString)")
                 }
                 let gradePointString = try cols[10].text().trim()

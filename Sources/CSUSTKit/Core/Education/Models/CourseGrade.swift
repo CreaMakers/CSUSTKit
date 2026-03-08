@@ -20,7 +20,7 @@ extension EduHelper {
         /// 学分
         public let credit: Double
         /// 总学时
-        public let totalHours: Int
+        public let totalHours: Double
         /// 绩点
         public let gradePoint: Double
         /// 补重学期
@@ -46,7 +46,7 @@ extension EduHelper {
             studyMode: String,
             gradeIdentifier: String,
             credit: Double,
-            totalHours: Int,
+            totalHours: Double,
             gradePoint: Double,
             retakeSemester: String,
             assessmentMethod: String,
