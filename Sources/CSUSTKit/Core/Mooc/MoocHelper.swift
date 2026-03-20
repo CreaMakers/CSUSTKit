@@ -103,8 +103,8 @@ public class MoocHelper: BaseHelper {
             let teacher = try cols[3].text()
             let course = Course(
                 id: id,
-                number: number,
                 name: name,
+                number: number,
                 department: department,
                 teacher: teacher
             )
@@ -114,11 +114,11 @@ public class MoocHelper: BaseHelper {
     }
 
     /// 获取课程作业列表
-    /// - Parameter courseId: 课程ID
+    /// - Parameter course: 课程
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程作业列表
-    public func getCourseAssignments(courseId: String) async throws -> [Assignment] {
-        let responseString = try await session.request(factory.make(.mooc, "/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(courseId)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline")).string()
+    public func getCourseAssignments(course: Course) async throws -> [Assignment] {
+        let responseString = try await session.request(factory.make(.mooc, "/meol/hw/stu/hwStuHwtList.do?sortDirection=-1&courseId=\(course.id)&pagingPage=1&pagingNumberPer=1000&sortColumn=deadline")).string()
         if isLoginRequired(response: responseString) {
             throw MoocHelperError.notLoggedIn
         }
@@ -150,11 +150,11 @@ public class MoocHelper: BaseHelper {
     }
 
     /// 获取课程测验列表
-    /// - Parameter courseId: 课程ID
+    /// - Parameter course: 课程
     /// - Throws: `MoocHelperError`
     /// - Returns: 课程测验列表
-    public func getCourseTests(courseId: String) async throws -> [Test] {
-        let response = try await session.request(factory.make(.mooc, "/meol/common/question/test/student/list.jsp?sortColumn=createTime&sortDirection=-1&cateId=\(courseId)&pagingPage=1&status=1&pagingNumberPer=1000")).string(.gbk)
+    public func getCourseExams(course: Course) async throws -> [Exam] {
+        let response = try await session.request(factory.make(.mooc, "/meol/common/question/test/student/list.jsp?sortColumn=createTime&sortDirection=-1&cateId=\(course.id)&pagingPage=1&status=1&pagingNumberPer=1000")).string(.gbk)
         if isLoginRequired(response: response) {
             throw MoocHelperError.notLoggedIn
         }
@@ -166,7 +166,7 @@ public class MoocHelper: BaseHelper {
         guard rows.count >= 1 else {
             throw MoocHelperError.testRetrievalFailed("测试表格格式无效")
         }
-        var tests: [Test] = []
+        var exams: [Exam] = []
         for (index, row) in rows.enumerated() {
             guard index > 0 else { continue }
             let cols = try row.getElementsByTag("td")
@@ -182,8 +182,8 @@ public class MoocHelper: BaseHelper {
                 throw MoocHelperError.testRetrievalFailed("时间限制格式无效")
             }
             let isSubmitted = try cols[7].html().contains("查看结果")
-            tests.append(
-                Test(
+            exams.append(
+                Exam(
                     title: title,
                     startTime: startTime,
                     endTime: endTime,
@@ -193,13 +193,13 @@ public class MoocHelper: BaseHelper {
                 )
             )
         }
-        return tests
+        return exams
     }
 
-    /// 获取有待完成作业的课程名称
+    /// 获取有待完成作业的课程
     /// - Throws: `MoocHelperError`
-    /// - Returns: 课程名称列表及其对应的课程ID
-    public func getCourseNamesWithPendingAssignments() async throws -> [(name: String, id: String)] {
+    /// - Returns: 课程列表
+    public func getCoursesWithPendingAssignments() async throws -> [Course] {
         let response = try await session.request(factory.make(.mooc, "/meol/welcomepage/student/interaction_reminder_v8.jsp")).string(.gbk)
         if isLoginRequired(response: response) {
             throw MoocHelperError.notLoggedIn
@@ -225,7 +225,7 @@ public class MoocHelper: BaseHelper {
             return []
         }
 
-        var courseNames: [(name: String, id: String)] = []
+        var courses: [Course] = []
         for courseNameElement in courseNameElements {
             let onclickAttr = try courseNameElement.attr("onclick")
             let regex = try NSRegularExpression(pattern: "lid=(\\d+)")
@@ -236,9 +236,9 @@ public class MoocHelper: BaseHelper {
             }
             let id = String(onclickAttr[range])
             let courseName = try courseNameElement.text().trim()
-            courseNames.append((name: courseName, id: id))
+            courses.append(Course(id: id, name: courseName, number: nil, department: nil, teacher: nil))
         }
-        return courseNames
+        return courses
     }
 
     /// 登出

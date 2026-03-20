@@ -2,7 +2,7 @@ import Foundation
 
 extension MoocHelper {
     /// 课程测试
-    public struct Test: BaseModel {
+    public struct Exam: BaseModel {
         /// 测试标题
         public let title: String
         /// 开始时间
