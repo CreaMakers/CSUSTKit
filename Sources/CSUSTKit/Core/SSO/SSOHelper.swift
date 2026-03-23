@@ -215,7 +215,7 @@ public class SSOHelper: BaseHelper {
         guard let finalURL = response.response?.url else {
             throw SSOHelperError.loginFailed("未找到重定向URL")
         }
-        guard finalURL == URL("https://ehall.csust.edu.cn/index.html") else {
+        guard finalURL == URL("https://ehall.csust.edu.cn/index.html") || finalURL == URL("https://ehall.csust.edu.cn/default/index.html") else {
             throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是验证码错误")
         }
     }
