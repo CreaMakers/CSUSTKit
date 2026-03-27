@@ -148,7 +148,7 @@ public class SSOHelper: BaseHelper {
         guard !finalURL.path.contains("/authserver/login") else {
             throw SSOHelperError.notLoggedIn
         }
-        guard finalURL == URL(factory.make(.mooc, "/meol/personal.do")) else {
+        guard finalURL == URL(factory.make(.mooc, "/meol/personal.do")) || finalURL == URL(factory.make(.mooc, "/meol/index.do")) else {
             throw SSOHelperError.loginToMoocFailed("重定向URL异常: \(finalURL)")
         }
         return session
