@@ -28,7 +28,7 @@ extension EduHelper {
                 throw EduHelperError.courseGradesRetrievalFailed("未找到课程成绩表格")
             }
             guard !(try table.html().contains("未查询到数据")) else {
-                return []
+                throw EduHelperError.courseGradesRetrievalFailed("未查询到数据")
             }
             let rows = try table.select("tr")
             var courseGrades: [CourseGrade] = []
