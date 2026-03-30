@@ -9,7 +9,15 @@ let package = Package(
         .iOS(.v13),
     ],
     products: [
-        .library(name: "CSUSTKit", targets: ["CSUSTKit"])
+        .library(
+            name: "CSUSTKit",
+            targets: ["CSUSTKit"]
+        ),
+        .library(
+            name: "CSUSTKit-dynamic",
+            type: .dynamic,
+            targets: ["CSUSTKit"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/Alamofire/Alamofire.git", .upToNextMajor(from: "5.10.2")),
@@ -42,6 +50,6 @@ let package = Package(
                 .product(name: "DotEnvy", package: "dotenvy"),
             ],
             path: "Tests"
-        )
+        ),
     ]
 )
