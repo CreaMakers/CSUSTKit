@@ -7,9 +7,9 @@ extension SSOHelper {
         public let userAccount: String
         /// 姓名
         public let userName: String
-        /// 身份证号（打码）
+        /// 身份证号（已打码数据）
         public let certCode: String
-        /// 手机号（打码）
+        /// 手机号（已打码数据）
         public let phone: String
         /// 邮箱
         public let email: String?
@@ -22,7 +22,7 @@ extension SSOHelper {
 
         /// 头像链接
         public var avatar: String {
-            if let headImageIcon = headImageIcon {
+            if let headImageIcon {
                 return headImageIcon
             } else {
                 return defaultUserAvatar

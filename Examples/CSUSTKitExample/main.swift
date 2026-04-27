@@ -44,7 +44,7 @@ struct Main {
         let ssoHelper = SSOHelper(session: session)
         do {
             let (username, password) = loadAuthServerAccount()
-            guard let username = username, let password = password else {
+            guard let username, let password else {
                 print("Username or password not found in environment variables.")
                 return
             }

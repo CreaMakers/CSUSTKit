@@ -13,7 +13,7 @@ extension EduHelper {
         /// - Returns: 考试信息数组
         public func getExamSchedule(academicYearSemester: String? = nil, semesterType: SemesterType? = nil) async throws -> [Exam] {
             var queryAcademicYearSemester: String
-            if let academicYearSemester = academicYearSemester {
+            if let academicYearSemester {
                 queryAcademicYearSemester = academicYearSemester
             } else {
                 let semesters = try await getAvailableSemestersForExamSchedule()
