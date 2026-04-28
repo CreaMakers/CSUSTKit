@@ -51,44 +51,16 @@ struct Main {
 
         let ssoHelper = SSOHelper(mode: connectionMode, session: session)
         do {
-            print("选择登录方式（1. 密码，2. 验证码）：")
-            guard let loginMethod = readLine(),
-                loginMethod == "1" || loginMethod == "2"
-            else {
+            let loginForm = try await ssoHelper.getLoginForm()
+            debugPrint("Login Form: \(loginForm)")
+            print("请输入用户名：")
+            guard let username = readLine() else {
                 return
             }
-            if loginMethod == "1" {
-                let loginForm = try await ssoHelper.getLoginForm()
-                debugPrint("Login Form: \(loginForm)")
-                print("请输入用户名：")
-                guard let username = readLine() else {
-                    return
-                }
-                let needCaptcha = try await ssoHelper.checkNeedCaptcha(username: username)
-                debugPrint("Need Captcha: \(needCaptcha)")
-                var captcha: String? = nil
-                if needCaptcha {
-                    let captchaImageData = try await ssoHelper.getCaptcha()
-                    let captchaImageURL = URL(fileURLWithPath: "captcha.jpg")
-                    try captchaImageData.write(to: captchaImageURL)
-                    print("验证码已保存到 \(captchaImageURL.path)，请输入验证码：")
-                    guard let captchaInput = readLine() else {
-                        return
-                    }
-                    captcha = captchaInput
-                }
-                print("请输入密码：")
-                guard let password = readLine() else {
-                    return
-                }
-                try await ssoHelper.login(loginForm: loginForm, username: username, password: password, captcha: captcha)
-            } else {
-                let loginForm = try await ssoHelper.getLoginForm()
-                debugPrint("Login Form: \(loginForm)")
-                print("请输入用户名：")
-                guard let username = readLine() else {
-                    return
-                }
+            let needCaptcha = try await ssoHelper.checkNeedCaptcha(username: username)
+            debugPrint("Need Captcha: \(needCaptcha)")
+            var captcha: String? = nil
+            if needCaptcha {
                 let captchaImageData = try await ssoHelper.getCaptcha()
                 let captchaImageURL = URL(fileURLWithPath: "captcha.jpg")
                 try captchaImageData.write(to: captchaImageURL)
@@ -96,13 +68,13 @@ struct Main {
                 guard let captchaInput = readLine() else {
                     return
                 }
-                try await ssoHelper.sendDynamicCode(mobile: username, captcha: captchaInput)
-                print("短信动态码已发送，请输入动态码：")
-                guard let dynamicCode = readLine() else {
-                    return
-                }
-                try await ssoHelper.dynamicLogin(loginForm: loginForm, username: username, dynamicCode: dynamicCode, captcha: captchaInput)
+                captcha = captchaInput
             }
+            print("请输入密码：")
+            guard let password = readLine() else {
+                return
+            }
+            try await ssoHelper.login(loginForm: loginForm, username: username, password: password, captcha: captcha)
 
             let loginUser = try await ssoHelper.getLoginUser()
             debugPrint("Login User: \(loginUser)")
