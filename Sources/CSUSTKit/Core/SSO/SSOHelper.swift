@@ -7,11 +7,6 @@ public class SSOHelper: BaseHelper {
 
     // MARK: - Models
 
-    private struct LoginForm {
-        let pwdEncryptSalt: String
-        let execution: String
-    }
-
     private struct LoginUserResponse: Decodable, Sendable {
         let data: Profile?
     }
@@ -30,18 +25,14 @@ public class SSOHelper: BaseHelper {
 
     // MARK: - Methods
 
-    private func checkNeedCaptcha(username: String) async throws -> Bool {
-        let timestamp = Date().millisecondsSince1970
-        let response = try await session.request(factory.make(.authServer, "/authserver/checkNeedCaptcha.htl?username=\(username)&_=\(timestamp)")).decodable(CheckResponse.self)
-        return response.isNeed
-    }
-
-    // 获取登录表单
-    private func getLoginForm() async throws -> (LoginForm?, Bool) {
+    /// 获取登录表单
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 登录表单数据
+    public func getLoginForm() async throws -> LoginForm {
         let response = await session.request(factory.make(.authServer, "/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin")).stringResponse()
         // 已经登录
         guard response.response?.url != URL(factory.make(.ehall, "/index.html")) else {
-            return (nil, true)
+            throw SSOHelperError.getLoginFormFailed("账号已登录")
         }
         guard let value = response.value else {
             throw SSOHelperError.getLoginFormFailed("无响应数据")
@@ -53,31 +44,79 @@ public class SSOHelper: BaseHelper {
         guard let executionInput = try document.select("input#execution").first() else {
             throw SSOHelperError.getLoginFormFailed("未找到execution输入框")
         }
-        let pwdEncryptSalt = try pwdEncryptSaltInput.attr("value")
-        let execution = try executionInput.attr("value")
-        return (LoginForm(pwdEncryptSalt: pwdEncryptSalt, execution: execution), false)
+        return LoginForm(pwdEncryptSalt: try pwdEncryptSaltInput.attr("value"), execution: try executionInput.attr("value"))
+    }
+
+    /// 检查是否需要验证码
+    /// - Parameter username: 用户名
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 是否需要验证码
+    public func checkNeedCaptcha(username: String) async throws -> Bool {
+        let timestamp = Date().millisecondsSince1970
+        let response = try await session.request(factory.make(.authServer, "/authserver/checkNeedCaptcha.htl?username=\(username)&_=\(timestamp)")).decodable(CheckResponse.self)
+        return response.isNeed
+    }
+
+    /// 获取验证码
+    /// - Throws: `SSOHelperError`
+    /// - Returns: 验证码图片数据
+    public func getCaptcha() async throws -> Data {
+        // let response = try await session.request("https://authserver.csust.edu.cn/authserver/getCaptcha.htl").data()
+        let response = try await session.request(factory.make(.authServer, "/authserver/getCaptcha.htl")).data()
+        guard !response.isEmpty else {
+            throw SSOHelperError.captchaRetrievalFailed
+        }
+        return response
+    }
+
+    /// 发送短信动态码
+    /// - Parameters:
+    ///   - mobile: 用户名
+    ///   - captcha: 验证码
+    /// - Throws: `SSOHelperError`
+    public func sendDynamicCode(mobile: String, captcha: String) async throws {
+        // 这里必须要使用 URLSession，Alamofire无法实现，原因不明
+        // let url = URL("https://authserver.csust.edu.cn/authserver/dynamicCode/getDynamicCode.htl")
+        // var request = URLRequest(url: url)
+        // request.httpMethod = "POST"
+        // request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        // request.httpBody = "mobile=\(mobile)&captcha=\(captcha)".data(using: .utf8)
+        // let (data, _) = try await URLSession.shared.data(for: request)
+        // guard !data.isEmpty else {
+        //     throw SSOHelperError.dynamicCodeRetrievalFailed("无响应数据")
+        // }
+        // let response = try JSONDecoder().decode(GetDynamicCodeResponse.self, from: data)
+        // guard response.code == "success" else {
+        //     throw SSOHelperError.dynamicCodeRetrievalFailed("错误，\(response.message)")
+        // }
+        // 使用Alamofire
+        let parameters: [String: String] = [
+            "mobile": mobile,
+            "captcha": captcha,
+        ]
+        let response = try await session.request(
+            factory.make(.authServer, "/authserver/dynamicCode/getDynamicCode.htl"),
+            method: .post,
+            parameters: parameters,
+            encoder: URLEncodedFormParameterEncoder.default
+        ).decodable(GetDynamicCodeResponse.self)
+        guard response.code == "success" else {
+            throw SSOHelperError.dynamicCodeRetrievalFailed("错误，\(response.message)")
+        }
     }
 
     /// 登录统一身份认证
     /// - Parameters:
     ///   - username: 用户名
     ///   - password: 密码
+    ///   - captcha: 验证码
     /// - Throws: `SSOHelperError`
-    public func login(username: String, password: String) async throws {
-        let (loginForm, isAlreadyLoggedIn) = try await getLoginForm()
-        guard !isAlreadyLoggedIn else { return }
-        guard let loginForm = loginForm else {
-            throw SSOHelperError.getLoginFormFailed("获取登录表单失败")
-        }
-        let needCaptcha = try await checkNeedCaptcha(username: username)
-        guard !needCaptcha else {
-            throw SSOHelperError.loginFailed("需要验证码，请前往ehall.csust.edu.cn手动登录后再重新登录")
-        }
+    public func login(loginForm: LoginForm, username: String, password: String, captcha: String?) async throws {
         let encryptedPassword = AESUtils.encryptPassword(password: password, salt: loginForm.pwdEncryptSalt)
         let parameters: [String: String] = [
             "username": username,
             "password": encryptedPassword,
-            "captcha": "",
+            "captcha": captcha ?? "",
             "_eventId": "submit",
             "cllt": "userNameLogin",
             "dllt": "generalLogin",
@@ -86,25 +125,87 @@ public class SSOHelper: BaseHelper {
         ]
         let response = await session.post(factory.make(.authServer, "/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin"), parameters).stringResponse()
         guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginFailed("未找到重定向URL")
+            throw SSOHelperError.loginFailed("未找到重定向链接")
         }
 
         var checkURL: URL = finalURL
 
         if mode == .webVpn {
             guard finalURL == URL("https://vpn.csust.edu.cn/login") else {
-                throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是密码错误")
+                if let responseString = response.value {
+                    let document = try SwiftSoup.parse(responseString)
+                    if let errorElement = try document.select("#showErrorTip").first() {
+                        throw SSOHelperError.loginFailed("登录失败: \(try errorElement.text())")
+                    }
+                }
+                throw SSOHelperError.loginFailed("登录失败: \(finalURL)")
             }
             let checkResponse = await session.request("https://vpn.csust.edu.cn/login?cas_login=true").stringResponse()
             guard let checkFinalURL = checkResponse.response?.url else {
-                throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是密码错误")
+                throw SSOHelperError.loginFailed("登录失败: \(finalURL)")
             }
             checkURL = checkFinalURL
         }
 
         guard checkURL == URL(factory.make(.ehall, "/index.html")) || finalURL == URL(factory.make(.ehall, "/default/index.html")) else {
-            throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是密码错误")
+            if let responseString = response.value {
+                let document = try SwiftSoup.parse(responseString)
+                if let errorElement = try document.select("#showErrorTip").first() {
+                    throw SSOHelperError.loginFailed("登录失败: \(try errorElement.text())")
+                }
+            }
+            throw SSOHelperError.loginFailed("登录失败: \(finalURL)")
         }
+    }
+
+    /// 短信动态码登录
+    /// - Parameters:
+    ///   - username: 用户名
+    ///   - dynamicCode: 短信动态码
+    ///   - captcha: 验证码
+    /// - Throws: `SSOHelperError`
+    public func dynamicLogin(loginForm: LoginForm, username: String, dynamicCode: String, captcha: String) async throws {
+        let parameters: [String: String] = [
+            "username": username,
+            "captcha": captcha,
+            "dynamicCode": dynamicCode,
+            "_eventId": "submit",
+            "cllt": "dynamicLogin",
+            "dllt": "generalLogin",
+            "lt": "",
+            "execution": loginForm.execution,
+        ]
+        // let response = await session.post("https://authserver.csust.edu.cn/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin", parameters).stringResponse()
+        let response = await session.post(factory.make(.authServer, "/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin"), parameters).stringResponse()
+        guard let finalURL = response.response?.url else {
+            throw SSOHelperError.loginFailed("未找到重定向URL")
+        }
+        // guard finalURL == URL("https://ehall.csust.edu.cn/index.html") || finalURL == URL("https://ehall.csust.edu.cn/default/index.html") else {
+        //     throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是验证码错误")
+        // }
+
+        var checkURL: URL = finalURL
+
+        if mode == .webVpn {
+            guard finalURL == URL("https://vpn.csust.edu.cn/login") else {
+                throw SSOHelperError.loginFailed("重定向链接异常: \(finalURL) 可能是密码错误")
+            }
+            let checkResponse = await session.request("https://vpn.csust.edu.cn/login?cas_login=true").stringResponse()
+            guard let checkFinalURL = checkResponse.response?.url else {
+                throw SSOHelperError.loginFailed("重定向链接异常: \(finalURL) 可能是密码错误")
+            }
+            checkURL = checkFinalURL
+        }
+
+        guard checkURL == URL(factory.make(.ehall, "/index.html")) || finalURL == URL(factory.make(.ehall, "/default/index.html")) else {
+            throw SSOHelperError.loginFailed("重定向链接异常: \(finalURL) 可能是密码错误")
+        }
+    }
+
+    /// 登出统一身份认证
+    public func logout() async throws {
+        try await session.request(factory.make(.ehall, "/logout")).data()
+        try await session.request(factory.make(.authServer, "/authserver/logout")).data()
     }
 
     /// 获取登录用户信息
@@ -118,15 +219,10 @@ public class SSOHelper: BaseHelper {
         return user
     }
 
-    /// 登出统一身份认证
-    public func logout() async throws {
-        try await session.request(factory.make(.ehall, "/logout")).data()
-        try await session.request(factory.make(.authServer, "/authserver/logout")).data()
-    }
-
     /// 从统一身份认证登录教务系统
     /// - Throws: `SSOHelperError`
     /// - Returns: 教务系统的会话信息
+    @discardableResult
     public func loginToEducation() async throws -> Session {
         try await session.request(factory.make(.education, "/sso.jsp")).data()
         let response = try await session.request(factory.make(.authServer, "/authserver/login?service=http%3A%2F%2Fxk.csust.edu.cn%2Fsso.jsp")).string()
@@ -139,6 +235,7 @@ public class SSOHelper: BaseHelper {
     /// 从统一身份认证登录网络课程中心
     /// - Throws: `SSOHelperError`
     /// - Returns: 网络课程中心的会话信息
+    @discardableResult
     public func loginToMooc() async throws -> Session {
         let request = session.request(factory.make(.mooc, "/meol/homepage/common/sso_login.jsp"))
         let response = await request.stringResponse()
@@ -152,72 +249,6 @@ public class SSOHelper: BaseHelper {
             throw SSOHelperError.loginToMoocFailed("重定向URL异常: \(finalURL)")
         }
         return session
-    }
-
-    /// 获取验证码
-    /// - Throws: `SSOHelperError`
-    /// - Returns: 验证码图片数据
-    public func getCaptcha() async throws -> Data {
-        let response = try await session.request("https://authserver.csust.edu.cn/authserver/getCaptcha.htl").data()
-        guard !response.isEmpty else {
-            throw SSOHelperError.captchaRetrievalFailed
-        }
-        return response
-    }
-
-    /// 获取短信动态码
-    /// - Parameters:
-    ///   - mobile: 用户名
-    ///   - captcha: 验证码
-    /// - Throws: `SSOHelperError`
-    public func getDynamicCode(mobile: String, captcha: String) async throws {
-        // 这里必须要使用 URLSession，Alamofire无法实现，原因不明
-        let url = URL("https://authserver.csust.edu.cn/authserver/dynamicCode/getDynamicCode.htl")
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.httpBody = "mobile=\(mobile)&captcha=\(captcha)".data(using: .utf8)
-        let (data, _) = try await URLSession.shared.data(for: request)
-        guard !data.isEmpty else {
-            throw SSOHelperError.dynamicCodeRetrievalFailed("无响应数据")
-        }
-        let response = try JSONDecoder().decode(GetDynamicCodeResponse.self, from: data)
-        guard response.code == "success" else {
-            throw SSOHelperError.dynamicCodeRetrievalFailed("错误，\(response.message)")
-        }
-    }
-
-    /// 短信动态码登录
-    /// - Parameters:
-    ///   - username: 用户名
-    ///   - dynamicCode: 短信动态码
-    ///   - captcha: 验证码
-    /// - Throws: `SSOHelperError`
-    public func dynamicLogin(username: String, dynamicCode: String, captcha: String) async throws {
-        let (loginForm, isAlreadyLoggedIn) = try await getLoginForm()
-        if isAlreadyLoggedIn {
-            return
-        }
-        guard let loginForm = loginForm else {
-            throw SSOHelperError.getLoginFormFailed("未找到登录表单")
-        }
-        let parameters: [String: String] = [
-            "username": username,
-            "captcha": captcha,
-            "dynamicCode": dynamicCode,
-            "_eventId": "submit",
-            "cllt": "dynamicLogin",
-            "dllt": "generalLogin",
-            "lt": "",
-            "execution": loginForm.execution,
-        ]
-        let response = await session.post("https://authserver.csust.edu.cn/authserver/login?service=https%3A%2F%2Fehall.csust.edu.cn%2Flogin", parameters).stringResponse()
-        guard let finalURL = response.response?.url else {
-            throw SSOHelperError.loginFailed("未找到重定向URL")
-        }
-        guard finalURL == URL("https://ehall.csust.edu.cn/index.html") || finalURL == URL("https://ehall.csust.edu.cn/default/index.html") else {
-            throw SSOHelperError.loginFailed("重定向URL异常: \(finalURL) 可能是验证码错误")
-        }
     }
 
     public override func isLoggedIn() async -> Bool {
