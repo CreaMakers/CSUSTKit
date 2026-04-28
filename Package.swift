@@ -37,10 +37,7 @@ let package = Package(
         ),
         .executableTarget(
             name: "CSUSTKitExample",
-            dependencies: [
-                "CSUSTKit",
-                .product(name: "DotEnvy", package: "dotenvy"),
-            ],
+            dependencies: ["CSUSTKit"],
             path: "Examples"
         ),
         .testTarget(
